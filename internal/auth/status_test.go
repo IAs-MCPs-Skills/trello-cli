@@ -3,18 +3,29 @@ package auth_test
 import (
 	"context"
 	"encoding/json"
+	"errors"
 	"net/http"
 	"net/http/httptest"
 	"testing"
 
 	"github.com/brettmcdowell/trello-cli/internal/auth"
+	"github.com/brettmcdowell/trello-cli/internal/contract"
 	"github.com/brettmcdowell/trello-cli/internal/credentials"
 )
 
 func TestStatusConfigured(t *testing.T) {
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		if r.Method != http.MethodGet {
+			t.Errorf("unexpected method: %s", r.Method)
+		}
 		if r.URL.Path != "/1/members/me" {
 			t.Errorf("unexpected path: %s", r.URL.Path)
+		}
+		if got := r.URL.Query().Get("key"); got != "key1" {
+			t.Errorf("key query = %q, want %q", got, "key1")
+		}
+		if got := r.URL.Query().Get("token"); got != "tok1" {
+			t.Errorf("token query = %q, want %q", got, "tok1")
 		}
 		json.NewEncoder(w).Encode(map[string]string{
 			"id":       "member123",
@@ -106,5 +117,12 @@ func TestStatusInvalidCredentials(t *testing.T) {
 	_, err := auth.Status(context.Background(), store, "default", server.URL)
 	if err == nil {
 		t.Fatal("Status() should return error for invalid credentials")
+	}
+	var ce *contract.ContractError
+	if !errors.As(err, &ce) {
+		t.Fatalf("error should be *ContractError, got %T", err)
+	}
+	if ce.Code != contract.AuthInvalid {
+		t.Errorf("Code = %q, want %q", ce.Code, contract.AuthInvalid)
 	}
 }

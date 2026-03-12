@@ -6,6 +6,7 @@ import (
 	"errors"
 	"fmt"
 	"net/http"
+	"net/url"
 	"time"
 
 	"github.com/brettmcdowell/trello-cli/internal/contract"
@@ -54,8 +55,17 @@ func Status(ctx context.Context, store credentials.Store, profile, baseURL strin
 }
 
 func getMember(ctx context.Context, baseURL, apiKey, token string) (*Member, error) {
-	url := fmt.Sprintf("%s/1/members/me?key=%s&token=%s", baseURL, apiKey, token)
-	req, err := http.NewRequestWithContext(ctx, http.MethodGet, url, nil)
+	memberURL, err := url.Parse(baseURL)
+	if err != nil {
+		return nil, contract.NewError(contract.HTTPError, fmt.Sprintf("failed to parse Trello base URL: %v", err))
+	}
+	memberURL.Path = "/1/members/me"
+	query := memberURL.Query()
+	query.Set("key", apiKey)
+	query.Set("token", token)
+	memberURL.RawQuery = query.Encode()
+
+	req, err := http.NewRequestWithContext(ctx, http.MethodGet, memberURL.String(), nil)
 	if err != nil {
 		return nil, contract.NewError(contract.HTTPError, fmt.Sprintf("failed to create member request: %v", err))
 	}
