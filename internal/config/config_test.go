@@ -84,6 +84,17 @@ func TestConfigFileOverridesDefaults(t *testing.T) {
 	}
 
 	t.Setenv("TRELLO_CONFIG_PATH", configPath)
+	for _, key := range []string{
+		"TRELLO_PROFILE",
+		"TRELLO_PRETTY",
+		"TRELLO_TIMEOUT",
+		"TRELLO_MAX_RETRIES",
+		"TRELLO_RETRY_MUTATIONS",
+		"TRELLO_VERBOSE",
+	} {
+		t.Setenv(key, "")
+		_ = os.Unsetenv(key)
+	}
 
 	cfg := config.Load()
 
@@ -111,6 +122,17 @@ func TestEnvOverridesConfigFile(t *testing.T) {
 	}
 
 	t.Setenv("TRELLO_CONFIG_PATH", configPath)
+	for _, key := range []string{
+		"TRELLO_PROFILE",
+		"TRELLO_PRETTY",
+		"TRELLO_TIMEOUT",
+		"TRELLO_MAX_RETRIES",
+		"TRELLO_RETRY_MUTATIONS",
+		"TRELLO_VERBOSE",
+	} {
+		t.Setenv(key, "")
+		_ = os.Unsetenv(key)
+	}
 	t.Setenv("TRELLO_PROFILE", "work")
 
 	cfg := config.Load()
