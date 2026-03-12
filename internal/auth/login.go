@@ -20,12 +20,13 @@ type LoginResult struct {
 // BuildAuthorizeURL builds the Trello authorization URL for interactive login.
 func BuildAuthorizeURL(apiKey, callbackURL string) string {
 	params := url.Values{
-		"expiration":    {"never"},
-		"name":          {"Trello CLI"},
-		"scope":         {"read,write"},
-		"response_type": {"token"},
-		"key":           {apiKey},
-		"return_url":    {callbackURL},
+		"expiration":      {"never"},
+		"name":            {"Trello CLI"},
+		"scope":           {"read,write"},
+		"response_type":   {"token"},
+		"callback_method": {"fragment"},
+		"key":             {apiKey},
+		"return_url":      {callbackURL},
 	}
 	return trelloAuthorizeBase + "?" + params.Encode()
 }

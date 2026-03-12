@@ -5,7 +5,7 @@ import (
 	"encoding/json"
 	"net/http"
 	"net/http/httptest"
-	"strings"
+	"net/url"
 	"testing"
 
 	"github.com/brettmcdowell/trello-cli/internal/auth"
@@ -94,15 +94,41 @@ func TestLoginInvalidToken(t *testing.T) {
 }
 
 func TestBuildAuthorizeURL(t *testing.T) {
-	url := auth.BuildAuthorizeURL("my-api-key", "http://localhost:12345/callback")
+	rawURL := auth.BuildAuthorizeURL("my-api-key", "http://localhost:12345/callback")
 
-	if url == "" {
+	if rawURL == "" {
 		t.Fatal("BuildAuthorizeURL() returned empty string")
 	}
-	if !strings.Contains(url, "key=my-api-key") {
-		t.Errorf("URL should contain API key, got: %s", url)
+	parsed, err := url.Parse(rawURL)
+	if err != nil {
+		t.Fatalf("url.Parse() returned error: %v", err)
 	}
-	if !strings.Contains(url, "return_url=") {
-		t.Errorf("URL should contain return_url, got: %s", url)
+	if parsed.Scheme != "https" {
+		t.Errorf("scheme = %q, want %q", parsed.Scheme, "https")
+	}
+	if parsed.Host != "trello.com" {
+		t.Errorf("host = %q, want %q", parsed.Host, "trello.com")
+	}
+	if parsed.Path != "/1/authorize" {
+		t.Errorf("path = %q, want %q", parsed.Path, "/1/authorize")
+	}
+	query := parsed.Query()
+	if got := query.Get("key"); got != "my-api-key" {
+		t.Errorf("key = %q, want %q", got, "my-api-key")
+	}
+	if got := query.Get("return_url"); got != "http://localhost:12345/callback" {
+		t.Errorf("return_url = %q, want %q", got, "http://localhost:12345/callback")
+	}
+	if got := query.Get("callback_method"); got != "fragment" {
+		t.Errorf("callback_method = %q, want %q", got, "fragment")
+	}
+	if got := query.Get("response_type"); got != "token" {
+		t.Errorf("response_type = %q, want %q", got, "token")
+	}
+	if got := query.Get("scope"); got != "read,write" {
+		t.Errorf("scope = %q, want %q", got, "read,write")
+	}
+	if got := query.Get("expiration"); got != "never" {
+		t.Errorf("expiration = %q, want %q", got, "never")
 	}
 }
