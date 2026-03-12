@@ -81,3 +81,70 @@ func TestSuccessEnvelopeHasNoErrorField(t *testing.T) {
 		t.Error("success envelope should not contain 'error' field")
 	}
 }
+
+func TestErrorEnvelope(t *testing.T) {
+	result, err := contract.ErrorEnvelope(contract.NotFound, "board not found")
+	if err != nil {
+		t.Fatalf("ErrorEnvelope() returned error: %v", err)
+	}
+
+	var envelope map[string]any
+	if err := json.Unmarshal(result, &envelope); err != nil {
+		t.Fatalf("ErrorEnvelope() produced invalid JSON: %v", err)
+	}
+
+	if envelope["ok"] != false {
+		t.Errorf("ok = %v, want false", envelope["ok"])
+	}
+
+	errObj, exists := envelope["error"]
+	if !exists {
+		t.Fatal("envelope missing 'error' field")
+	}
+
+	errMap, ok := errObj.(map[string]any)
+	if !ok {
+		t.Fatal("error is not an object")
+	}
+
+	if errMap["code"] != "NOT_FOUND" {
+		t.Errorf("error.code = %v, want NOT_FOUND", errMap["code"])
+	}
+	if errMap["message"] != "board not found" {
+		t.Errorf("error.message = %v, want 'board not found'", errMap["message"])
+	}
+}
+
+func TestErrorEnvelopeHasNoDataField(t *testing.T) {
+	result, err := contract.ErrorEnvelope(contract.AuthRequired, "not logged in")
+	if err != nil {
+		t.Fatalf("ErrorEnvelope() returned error: %v", err)
+	}
+
+	var envelope map[string]any
+	if err := json.Unmarshal(result, &envelope); err != nil {
+		t.Fatalf("invalid JSON: %v", err)
+	}
+
+	if _, exists := envelope["data"]; exists {
+		t.Error("error envelope should not contain 'data' field")
+	}
+}
+
+func TestErrorEnvelopeFromContractError(t *testing.T) {
+	ce := &contract.ContractError{Code: contract.ValidationError, Message: "missing --board"}
+	result, err := contract.ErrorFromContractError(ce)
+	if err != nil {
+		t.Fatalf("ErrorFromContractError() returned error: %v", err)
+	}
+
+	var envelope map[string]any
+	if err := json.Unmarshal(result, &envelope); err != nil {
+		t.Fatalf("invalid JSON: %v", err)
+	}
+
+	errMap := envelope["error"].(map[string]any)
+	if errMap["code"] != "VALIDATION_ERROR" {
+		t.Errorf("error.code = %v, want VALIDATION_ERROR", errMap["code"])
+	}
+}
