@@ -191,3 +191,86 @@ func TestEnvStoreDeleteReturnsError(t *testing.T) {
 		t.Error("EnvStore.Delete() should return an error (read-only)")
 	}
 }
+
+func TestFallbackStoreUsesFirst(t *testing.T) {
+	primary := credentials.NewMemoryStore()
+	secondary := credentials.NewMemoryStore()
+	want := credentials.Credentials{APIKey: "primary-key", Token: "primary-token", AuthMode: "manual"}
+	if err := primary.Set("default", want); err != nil {
+		t.Fatalf("primary.Set() returned error: %v", err)
+	}
+
+	store := credentials.NewFallbackStore(primary, secondary)
+	got, err := store.Get("default")
+	if err != nil {
+		t.Fatalf("Get() returned error: %v", err)
+	}
+	if got != want {
+		t.Errorf("Get() = %+v, want %+v", got, want)
+	}
+}
+
+func TestFallbackStoreUsesSecondWhenFirstMissing(t *testing.T) {
+	primary := credentials.NewMemoryStore()
+	secondary := credentials.NewMemoryStore()
+	want := credentials.Credentials{APIKey: "secondary-key", Token: "secondary-token", AuthMode: "manual"}
+	if err := secondary.Set("default", want); err != nil {
+		t.Fatalf("secondary.Set() returned error: %v", err)
+	}
+
+	store := credentials.NewFallbackStore(primary, secondary)
+	got, err := store.Get("default")
+	if err != nil {
+		t.Fatalf("Get() returned error: %v", err)
+	}
+	if got != want {
+		t.Errorf("Get() = %+v, want %+v", got, want)
+	}
+}
+
+func TestFallbackStoreReturnsErrWhenBothMissing(t *testing.T) {
+	primary := credentials.NewMemoryStore()
+	secondary := credentials.NewMemoryStore()
+
+	store := credentials.NewFallbackStore(primary, secondary)
+	if _, err := store.Get("default"); !errors.Is(err, credentials.ErrNotConfigured) {
+		t.Errorf("Get() error = %v, want ErrNotConfigured", err)
+	}
+}
+
+func TestFallbackStoreSetWritesToPrimary(t *testing.T) {
+	primary := credentials.NewMemoryStore()
+	secondary := credentials.NewMemoryStore()
+	creds := credentials.Credentials{APIKey: "set-key", Token: "set-token", AuthMode: "manual"}
+
+	store := credentials.NewFallbackStore(primary, secondary)
+	if err := store.Set("default", creds); err != nil {
+		t.Fatalf("Set() returned error: %v", err)
+	}
+
+	got, err := primary.Get("default")
+	if err != nil {
+		t.Fatalf("primary.Get() returned error: %v", err)
+	}
+	if got != creds {
+		t.Errorf("primary.Get() = %+v, want %+v", got, creds)
+	}
+}
+
+func TestFallbackStoreDeleteFromPrimary(t *testing.T) {
+	primary := credentials.NewMemoryStore()
+	secondary := credentials.NewMemoryStore()
+	creds := credentials.Credentials{APIKey: "del-key", Token: "del-token", AuthMode: "manual"}
+	if err := primary.Set("default", creds); err != nil {
+		t.Fatalf("primary.Set() returned error: %v", err)
+	}
+
+	store := credentials.NewFallbackStore(primary, secondary)
+	if err := store.Delete("default"); err != nil {
+		t.Fatalf("Delete() returned error: %v", err)
+	}
+
+	if _, err := primary.Get("default"); !errors.Is(err, credentials.ErrNotConfigured) {
+		t.Errorf("primary.Get() error = %v, want ErrNotConfigured", err)
+	}
+}

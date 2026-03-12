@@ -135,3 +135,36 @@ func (e *EnvStore) Set(profile string, creds Credentials) error {
 func (e *EnvStore) Delete(profile string) error {
 	return ErrReadOnly
 }
+
+// FallbackStore tries the primary Store first and falls back to secondary when credentials are not configured.
+type FallbackStore struct {
+	primary   Store
+	secondary Store
+}
+
+// NewFallbackStore creates a new fallback chain with the provided primary and secondary stores.
+func NewFallbackStore(primary, secondary Store) *FallbackStore {
+	return &FallbackStore{
+		primary:   primary,
+		secondary: secondary,
+	}
+}
+
+func (f *FallbackStore) Get(profile string) (Credentials, error) {
+	creds, err := f.primary.Get(profile)
+	if err == nil {
+		return creds, nil
+	}
+	if !errors.Is(err, ErrNotConfigured) {
+		return Credentials{}, err
+	}
+	return f.secondary.Get(profile)
+}
+
+func (f *FallbackStore) Set(profile string, creds Credentials) error {
+	return f.primary.Set(profile, creds)
+}
+
+func (f *FallbackStore) Delete(profile string) error {
+	return f.primary.Delete(profile)
+}
