@@ -2,13 +2,10 @@ package credentials_test
 
 import (
 	"errors"
-	"os"
 	"testing"
 
 	"github.com/brettmcdowell/trello-cli/internal/credentials"
 )
-
-var _ = os.Getenv
 
 func TestErrNotConfiguredSentinel(t *testing.T) {
 	err := credentials.ErrNotConfigured
