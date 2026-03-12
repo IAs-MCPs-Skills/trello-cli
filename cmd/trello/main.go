@@ -1,7 +1,16 @@
 package main
 
-import "fmt"
+import "os"
+
+// Build metadata — set via ldflags at build time.
+var (
+	version = "dev"
+	commit  = "unknown"
+	date    = "unknown"
+)
 
 func main() {
-	fmt.Println("trello cli")
+	if err := rootCmd.Execute(); err != nil {
+		os.Exit(handleError(os.Stdout, err))
+	}
 }
