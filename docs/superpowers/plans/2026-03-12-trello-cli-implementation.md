@@ -3527,6 +3527,13 @@ type DeleteResult struct {
 	Deleted bool   `json:"deleted"`
 	ID      string `json:"id"`
 }
+
+// ActionResult is the response shape for void add/remove operations
+// (labels add, labels remove, members add, members remove).
+type ActionResult struct {
+	Success bool   `json:"success"`
+	ID      string `json:"id"`
+}
 ```
 
 - [ ] **Step 2: Verify it compiles**
@@ -3792,14 +3799,10 @@ func (c *Client) PostMultipart(ctx context.Context, path string, params map[stri
 	return nil
 }
 
-func (c *Client) do(ctx context.Context, method, path string, params map[string]string, result any) error {
-	// Build URL with auth and request params as query parameters.
-	// Trello API expects all data (including mutations) as query params.
-	u, err := url.Parse(c.baseURL + path)
-	if err != nil {
-		return fmt.Errorf("invalid URL: %w", err)
-	}
-
+// buildURL constructs the full URL with auth query params (key, token) and any
+// additional request params. Shared by both do() and postMultipartFile().
+func (c *Client) buildURL(path string, params map[string]string) string {
+	u, _ := url.Parse(c.baseURL + path)
 	q := u.Query()
 	q.Set("key", c.apiKey)
 	q.Set("token", c.token)
@@ -3807,8 +3810,15 @@ func (c *Client) do(ctx context.Context, method, path string, params map[string]
 		q.Set(k, v)
 	}
 	u.RawQuery = q.Encode()
+	return u.String()
+}
 
-	req, err := http.NewRequestWithContext(ctx, method, u.String(), nil)
+func (c *Client) do(ctx context.Context, method, path string, params map[string]string, result any) error {
+	// Use buildURL for centralized auth injection.
+	// Trello API expects all data (including mutations) as query params.
+	fullURL := c.buildURL(path, params)
+
+	req, err := http.NewRequestWithContext(ctx, method, fullURL, nil)
 	if err != nil {
 		return fmt.Errorf("failed to create request: %w", err)
 	}
@@ -4211,13 +4221,10 @@ func waitForRetry(ctx context.Context, attempt int) error {
 Modify `internal/trello/client.go` — replace the `do` method with a retry-aware version:
 
 ```go
-func (c *Client) do(ctx context.Context, method, path string, params map[string]string, result any) error {
-	// Build URL with auth and request params as query parameters.
-	u, err := url.Parse(c.baseURL + path)
-	if err != nil {
-		return fmt.Errorf("invalid URL: %w", err)
-	}
-
+// buildURL constructs the full URL with auth query params (key, token) and any
+// additional request params. Shared by both do() and postMultipartFile().
+func (c *Client) buildURL(path string, params map[string]string) string {
+	u, _ := url.Parse(c.baseURL + path)
 	q := u.Query()
 	q.Set("key", c.apiKey)
 	q.Set("token", c.token)
@@ -4225,6 +4232,11 @@ func (c *Client) do(ctx context.Context, method, path string, params map[string]
 		q.Set(k, v)
 	}
 	u.RawQuery = q.Encode()
+	return u.String()
+}
+
+func (c *Client) do(ctx context.Context, method, path string, params map[string]string, result any) error {
+	fullURL := c.buildURL(path, params)
 
 	maxAttempts := 1 + c.opts.MaxRetries
 	if isMutation(method) && !c.opts.RetryMutations {
@@ -4239,7 +4251,7 @@ func (c *Client) do(ctx context.Context, method, path string, params map[string]
 			}
 		}
 
-		req, err := http.NewRequestWithContext(ctx, method, u.String(), nil)
+		req, err := http.NewRequestWithContext(ctx, method, fullURL, nil)
 		if err != nil {
 			return fmt.Errorf("failed to create request: %w", err)
 		}
@@ -4727,11 +4739,10 @@ import (
 // apiClient is the Trello API client. Overridden in tests with a mock.
 var apiClient trello.API
 
-func getAPIClient() trello.API {
+func getAPIClient(creds credentials.Credentials) trello.API {
 	if apiClient != nil {
 		return apiClient
 	}
-	creds, _ := auth.RequireAuth(getCredStore(), "default")
 	apiClient = trello.NewClient(trelloBaseURL, creds.APIKey, creds.Token, trello.DefaultClientOptions())
 	return apiClient
 }
@@ -4745,10 +4756,11 @@ var boardsListCmd = &cobra.Command{
 	Use:   "list",
 	Short: "List visible boards",
 	RunE: func(cmd *cobra.Command, args []string) error {
-		if _, err := auth.RequireAuth(getCredStore(), "default"); err != nil {
+		creds, err := auth.RequireAuth(getCredStore(), "default")
+		if err != nil {
 			return err
 		}
-		boards, err := getAPIClient().ListBoards(cmd.Context())
+		boards, err := getAPIClient(creds).ListBoards(cmd.Context())
 		if err != nil {
 			return err
 		}
@@ -4764,10 +4776,11 @@ var boardsGetCmd = &cobra.Command{
 		if err := contract.RequireFlag("board", boardID); err != nil {
 			return err
 		}
-		if _, err := auth.RequireAuth(getCredStore(), "default"); err != nil {
+		creds, err := auth.RequireAuth(getCredStore(), "default")
+		if err != nil {
 			return err
 		}
-		board, err := getAPIClient().GetBoard(cmd.Context(), boardID)
+		board, err := getAPIClient(creds).GetBoard(cmd.Context(), boardID)
 		if err != nil {
 			return err
 		}
@@ -4857,8 +4870,8 @@ func (c *Client) UpdateList(ctx context.Context, listID string, params UpdateLis
 
 func (c *Client) ArchiveList(ctx context.Context, listID string) (List, error) {
 	var list List
-	err := c.Put(ctx, fmt.Sprintf("/1/lists/%s", listID), map[string]string{
-		"closed": "true",
+	err := c.Put(ctx, fmt.Sprintf("/1/lists/%s/closed", listID), map[string]string{
+		"value": "true",
 	}, &list)
 	return list, err
 }
@@ -4892,20 +4905,30 @@ git commit -m "feat: implement list API client methods (list, create, update, ar
 - Create: `cmd/trello/lists.go`
 - Create: `cmd/trello/lists_test.go`
 
-Follow the same pattern as boards. Test each command for:
-- Success with mock API
-- Missing required flags (`--board` for list/create, `--list` for update/archive/move)
-- At-least-one validation for update
-- Auth guard
+Follow the same pattern as boards. All command handlers use the single-auth-check pattern: `creds, err := auth.RequireAuth(...)` then `getAPIClient(creds)`.
+
+Commands and required test cases:
+- `lists list --board <id>` — requires `--board`
+  - Test: success returns JSON array of lists
+  - Test: missing `--board` returns VALIDATION_ERROR
+  - Test: auth guard returns AUTH_REQUIRED when no creds
+- `lists create --board <id> --name <name>` — requires both
+  - Test: success returns created list
+  - Test: missing `--board` returns VALIDATION_ERROR
+  - Test: missing `--name` returns VALIDATION_ERROR
+- `lists update --list <id> [--name] [--pos]` — requires `--list` + at least one mutation
+  - Test: success with `--name` returns updated list
+  - Test: missing `--list` returns VALIDATION_ERROR
+  - Test: no mutation flags returns VALIDATION_ERROR (RequireAtLeastOne)
+- `lists archive --list <id>` — requires `--list`
+  - Test: success returns list with closed=true
+  - Test: missing `--list` returns VALIDATION_ERROR
+- `lists move --list <id> --board <id> [--pos]` — requires both `--list` and `--board`
+  - Test: success returns moved list
+  - Test: missing `--list` returns VALIDATION_ERROR
+  - Test: missing `--board` returns VALIDATION_ERROR
 
 - [ ] **Step 1-4: Write tests, implement, verify**
-
-Key implementation details:
-- `lists list --board <id>` — requires `--board`
-- `lists create --board <id> --name <name>` — requires both
-- `lists update --list <id> [--name] [--pos]` — requires `--list` + at least one mutation
-- `lists archive --list <id>` — requires `--list`
-- `lists move --list <id> --board <id> [--pos]` — requires both `--list` and `--board`
 
 - [ ] **Step 5: Commit**
 
@@ -5012,8 +5035,8 @@ func (c *Client) MoveCard(ctx context.Context, cardID, listID string, pos *float
 
 func (c *Client) ArchiveCard(ctx context.Context, cardID string) (Card, error) {
 	var card Card
-	err := c.Put(ctx, fmt.Sprintf("/1/cards/%s", cardID), map[string]string{
-		"closed": "true",
+	err := c.Put(ctx, fmt.Sprintf("/1/cards/%s/closed", cardID), map[string]string{
+		"value": "true",
 	}, &card)
 	return card, err
 }
@@ -5041,11 +5064,36 @@ git commit -m "feat: implement card API client methods (list, get, create, updat
 - Create: `cmd/trello/cards.go`
 - Create: `cmd/trello/cards_test.go`
 
-Key validation patterns:
-- `cards list` — `RequireExactlyOne({"board": boardID, "list": listID})`
-- `cards create` — `RequireFlag("list")`, `RequireFlag("name")`, `ValidateISO8601Optional(due)`
-- `cards update` — `RequireFlag("card")`, `RequireAtLeastOne({name, desc, due, labels, members})`
-- `cards delete` — returns `DeleteResult{Deleted: true, ID: cardID}` envelope
+All command handlers use the single-auth-check pattern: `creds, err := auth.RequireAuth(...)` then `getAPIClient(creds)`.
+
+Commands, validation patterns, and required test cases:
+- `cards list --board <id>|--list <id>` — `RequireExactlyOne({"board": boardID, "list": listID})`
+  - Test: success with `--board` returns cards
+  - Test: success with `--list` returns cards
+  - Test: both `--board` and `--list` returns VALIDATION_ERROR
+  - Test: neither flag returns VALIDATION_ERROR
+- `cards get --card <id>` — `RequireFlag("card")`
+  - Test: success returns card
+  - Test: missing `--card` returns VALIDATION_ERROR
+- `cards create --list <id> --name <name> [--desc] [--due] [--labels] [--members]`
+  - Test: success with required flags returns created card
+  - Test: missing `--list` returns VALIDATION_ERROR
+  - Test: missing `--name` returns VALIDATION_ERROR
+  - Test: invalid `--due` (not ISO8601) returns VALIDATION_ERROR
+  - Test: valid `--due` (ISO8601) succeeds
+- `cards update --card <id> [--name] [--desc] [--due] [--labels] [--members]`
+  - Test: success with `--name` returns updated card
+  - Test: missing `--card` returns VALIDATION_ERROR
+  - Test: no mutation flags returns VALIDATION_ERROR (RequireAtLeastOne)
+  - Test: invalid `--due` returns VALIDATION_ERROR
+- `cards move --card <id> --list <id> [--pos]`
+  - Test: success returns moved card
+  - Test: missing `--card` or `--list` returns VALIDATION_ERROR
+- `cards archive --card <id>` — requires `--card`
+  - Test: success returns card with closed=true
+- `cards delete --card <id>` — returns `DeleteResult{Deleted: true, ID: cardID}` envelope
+  - Test: success returns DeleteResult JSON
+  - Test: missing `--card` returns VALIDATION_ERROR
 
 - [ ] **Step 1-4: Write tests, implement, verify**
 - [ ] **Step 5: Commit**
@@ -5103,8 +5151,8 @@ func (c *Client) AddComment(ctx context.Context, cardID, text string) (Comment, 
 
 func (c *Client) UpdateComment(ctx context.Context, actionID, text string) (Comment, error) {
 	var comment Comment
-	err := c.Put(ctx, fmt.Sprintf("/1/actions/%s", actionID),
-		map[string]string{"text": text}, &comment)
+	err := c.Put(ctx, fmt.Sprintf("/1/actions/%s/text", actionID),
+		map[string]string{"value": text}, &comment)
 	return comment, err
 }
 
@@ -5134,6 +5182,9 @@ Commands:
 - `comments add --card <id> --text <text>` — requires both
 - `comments update --action <id> --text <text>` — requires both
 - `comments delete --action <id>` — requires `--action`
+
+Response shapes for void operations:
+- `comments delete` returns `DeleteResult{Deleted: true, ID: actionID}` in the success envelope, same pattern as `cards delete`
 
 - [ ] **Step 1-4: Write tests, implement, verify**
 - [ ] **Step 5: Commit**
@@ -5215,6 +5266,10 @@ Commands:
 - `checklists items update --card <id> --item <id> --state <complete|incomplete>`
 - `checklists items delete --checklist <id> --item <id>`
 
+Response shapes for void operations:
+- `checklists delete` returns `DeleteResult{Deleted: true, ID: checklistID}`
+- `checklists items delete` returns `DeleteResult{Deleted: true, ID: itemID}`
+
 Key validation: `--state` must be `complete` or `incomplete` — use a custom validator:
 ```go
 func validateState(state string) error {
@@ -5286,6 +5341,8 @@ func (c *Client) DeleteAttachment(ctx context.Context, cardID, attachmentID stri
 }
 
 // postMultipartFile handles multipart/form-data file uploads.
+// Uses the centralized buildURL method for auth injection (key/token query params)
+// and mapHTTPError for error normalization — same as all other API methods.
 func (c *Client) postMultipartFile(ctx context.Context, path, filePath string, params map[string]string, result any) error {
 	file, err := os.Open(filePath)
 	if err != nil {
@@ -5298,10 +5355,10 @@ func (c *Client) postMultipartFile(ctx context.Context, path, filePath string, p
 
 	part, err := writer.CreateFormFile("file", filepath.Base(filePath))
 	if err != nil {
-		return fmt.Errorf("failed to create form file: %w", err)
+		return contract.NewError(contract.UnknownError, fmt.Sprintf("failed to create form file: %v", err))
 	}
 	if _, err := io.Copy(part, file); err != nil {
-		return fmt.Errorf("failed to copy file: %w", err)
+		return contract.NewError(contract.UnknownError, fmt.Sprintf("failed to read file: %v", err))
 	}
 
 	for k, v := range params {
@@ -5309,13 +5366,10 @@ func (c *Client) postMultipartFile(ctx context.Context, path, filePath string, p
 	}
 	writer.Close()
 
-	u, _ := url.Parse(c.baseURL + path)
-	q := u.Query()
-	q.Set("key", c.apiKey)
-	q.Set("token", c.token)
-	u.RawQuery = q.Encode()
+	// Use buildURL for centralized auth injection — same as Do()
+	fullURL := c.buildURL(path, nil)
 
-	req, err := http.NewRequestWithContext(ctx, http.MethodPost, u.String(), body)
+	req, err := http.NewRequestWithContext(ctx, http.MethodPost, fullURL, body)
 	if err != nil {
 		return err
 	}
@@ -5323,7 +5377,7 @@ func (c *Client) postMultipartFile(ctx context.Context, path, filePath string, p
 
 	resp, err := c.httpClient.Do(req)
 	if err != nil {
-		return fmt.Errorf("upload failed: %w", err)
+		return contract.NewError(contract.HTTPError, fmt.Sprintf("upload failed: %v", err))
 	}
 	defer resp.Body.Close()
 
@@ -5336,6 +5390,10 @@ func (c *Client) postMultipartFile(ctx context.Context, path, filePath string, p
 	}
 	return nil
 }
+
+// NOTE: The Client must expose a buildURL method that constructs the full URL
+// with auth query params (key, token). Extract this from the Do() method
+// so both Do() and postMultipartFile() share the same auth injection logic.
 ```
 
 Additional imports needed: `"bytes"`, `"io"`, `"mime/multipart"`, `"os"`, `"path/filepath"`.
@@ -5364,6 +5422,9 @@ Commands:
 - `attachments add-file --card <id> --path <path> [--name <name>]` — validates file exists via `ValidateFilePath`
 - `attachments add-url --card <id> --url <url> [--name <name>]` — validates URL via `ValidateURL`
 - `attachments delete --card <id> --attachment <id>`
+
+Response shapes for void operations:
+- `attachments delete` returns `DeleteResult{Deleted: true, ID: attachmentID}`
 
 - [ ] **Step 1-4: Write tests, implement, verify**
 - [ ] **Step 5: Commit**
@@ -5435,6 +5496,17 @@ Commands:
 - `labels add --card <id> --label <id>`
 - `labels remove --card <id> --label <id>`
 
+Response shapes for void operations:
+- `labels add` returns `DeleteResult{Deleted: false, ID: labelID}` — reuse the struct but rename conceptually. Alternatively, define an `ActionResult` type:
+```go
+// ActionResult is the response shape for void add/remove operations.
+type ActionResult struct {
+	Success bool   `json:"success"`
+	ID      string `json:"id"`
+}
+```
+Add `ActionResult` to `internal/trello/types.go` alongside `DeleteResult`. Use `ActionResult` for `labels add`, `labels remove`, `members add`, `members remove`. Use `DeleteResult` for all delete operations.
+
 - [ ] **Step 1-4: Write tests, implement, verify**
 - [ ] **Step 5: Commit**
 
@@ -5479,6 +5551,12 @@ Commands:
 - `members list --board <id>`
 - `members add --card <id> --member <id>`
 - `members remove --card <id> --member <id>`
+
+Response shapes for void operations:
+- `members add` returns `ActionResult{Success: true, ID: memberID}`
+- `members remove` returns `ActionResult{Success: true, ID: memberID}`
+
+All command handlers follow the single-auth-check pattern: call `auth.RequireAuth` once, pass `creds` to `getAPIClient(creds)`.
 
 - [ ] **Step 1-4: Write tests, implement, verify**
 - [ ] **Step 5: Commit**
