@@ -2,10 +2,13 @@ package credentials_test
 
 import (
 	"errors"
+	"os"
 	"testing"
 
 	"github.com/brettmcdowell/trello-cli/internal/credentials"
 )
+
+var _ = os.Getenv
 
 func TestErrNotConfiguredSentinel(t *testing.T) {
 	err := credentials.ErrNotConfigured
@@ -131,5 +134,63 @@ func TestKeyringStoreServiceName(t *testing.T) {
 	svc2 := credentials.KeyringServiceName("work")
 	if svc2 != "trello-cli/work" {
 		t.Errorf("service name = %q, want %q", svc2, "trello-cli/work")
+	}
+}
+
+func TestEnvStoreGetWithEnvVars(t *testing.T) {
+	t.Setenv("TRELLO_API_KEY", "env-key")
+	t.Setenv("TRELLO_TOKEN", "env-token")
+
+	store := credentials.NewEnvStore()
+	got, err := store.Get("default")
+	if err != nil {
+		t.Fatalf("Get() returned error: %v", err)
+	}
+	if got.APIKey != "env-key" {
+		t.Errorf("APIKey = %q, want %q", got.APIKey, "env-key")
+	}
+	if got.Token != "env-token" {
+		t.Errorf("Token = %q, want %q", got.Token, "env-token")
+	}
+	if got.AuthMode != "env" {
+		t.Errorf("AuthMode = %q, want %q", got.AuthMode, "env")
+	}
+}
+
+func TestEnvStoreGetMissingKey(t *testing.T) {
+	t.Setenv("TRELLO_API_KEY", "")
+	t.Setenv("TRELLO_TOKEN", "")
+
+	store := credentials.NewEnvStore()
+	_, err := store.Get("default")
+	if !errors.Is(err, credentials.ErrNotConfigured) {
+		t.Errorf("Get() error = %v, want ErrNotConfigured", err)
+	}
+}
+
+func TestEnvStoreGetPartialCreds(t *testing.T) {
+	t.Setenv("TRELLO_API_KEY", "env-key")
+	t.Setenv("TRELLO_TOKEN", "")
+
+	store := credentials.NewEnvStore()
+	_, err := store.Get("default")
+	if !errors.Is(err, credentials.ErrNotConfigured) {
+		t.Errorf("Get() with only API key error = %v, want ErrNotConfigured", err)
+	}
+}
+
+func TestEnvStoreSetReturnsError(t *testing.T) {
+	store := credentials.NewEnvStore()
+	err := store.Set("default", credentials.Credentials{})
+	if err == nil {
+		t.Error("EnvStore.Set() should return an error (read-only)")
+	}
+}
+
+func TestEnvStoreDeleteReturnsError(t *testing.T) {
+	store := credentials.NewEnvStore()
+	err := store.Delete("default")
+	if err == nil {
+		t.Error("EnvStore.Delete() should return an error (read-only)")
 	}
 }

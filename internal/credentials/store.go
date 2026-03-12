@@ -3,12 +3,16 @@ package credentials
 import (
 	"encoding/json"
 	"errors"
+	"os"
 
 	"github.com/zalando/go-keyring"
 )
 
 // ErrNotConfigured is returned when no credentials are stored for the requested profile.
 var ErrNotConfigured = errors.New("credentials not configured")
+
+// ErrReadOnly is returned when Set or Delete is called on a read-only store.
+var ErrReadOnly = errors.New("credential store is read-only")
 
 // Credentials holds the API key, token, and auth mode for a profile.
 type Credentials struct {
@@ -99,4 +103,35 @@ func (k *KeyringStore) Delete(profile string) error {
 		return nil
 	}
 	return err
+}
+
+// EnvStore reads credentials from environment variables. It is read-only.
+type EnvStore struct{}
+
+// NewEnvStore creates a new environment-variable-backed credential store.
+func NewEnvStore() *EnvStore {
+	return &EnvStore{}
+}
+
+// Get reads credentials from TRELLO_API_KEY and TRELLO_TOKEN environment variables.
+// The profile parameter is ignored — env-based auth has no profile concept.
+func (e *EnvStore) Get(profile string) (Credentials, error) {
+	apiKey := os.Getenv("TRELLO_API_KEY")
+	token := os.Getenv("TRELLO_TOKEN")
+	if apiKey == "" || token == "" {
+		return Credentials{}, ErrNotConfigured
+	}
+	return Credentials{
+		APIKey:   apiKey,
+		Token:    token,
+		AuthMode: "env",
+	}, nil
+}
+
+func (e *EnvStore) Set(profile string, creds Credentials) error {
+	return ErrReadOnly
+}
+
+func (e *EnvStore) Delete(profile string) error {
+	return ErrReadOnly
 }
