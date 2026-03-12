@@ -2,6 +2,7 @@ package config_test
 
 import (
 	"os"
+	"path/filepath"
 	"testing"
 	"time"
 
@@ -70,5 +71,52 @@ func TestMissingConfigFileDoesNotError(t *testing.T) {
 	// Should still return defaults without error
 	if cfg.Profile != "default" {
 		t.Errorf("Profile = %q, want %q", cfg.Profile, "default")
+	}
+}
+
+func TestConfigFileOverridesDefaults(t *testing.T) {
+	// Create a temp config file
+	dir := t.TempDir()
+	configPath := filepath.Join(dir, "config.yaml")
+	content := []byte("profile: personal\npretty: true\ntimeout: 20s\nmax_retries: 1\n")
+	if err := os.WriteFile(configPath, content, 0644); err != nil {
+		t.Fatalf("failed to write temp config: %v", err)
+	}
+
+	t.Setenv("TRELLO_CONFIG_PATH", configPath)
+
+	cfg := config.Load()
+
+	if cfg.Profile != "personal" {
+		t.Errorf("Profile = %q, want %q", cfg.Profile, "personal")
+	}
+	if cfg.Pretty != true {
+		t.Errorf("Pretty = %v, want true", cfg.Pretty)
+	}
+	if cfg.Timeout != 20*time.Second {
+		t.Errorf("Timeout = %v, want %v", cfg.Timeout, 20*time.Second)
+	}
+	if cfg.MaxRetries != 1 {
+		t.Errorf("MaxRetries = %d, want 1", cfg.MaxRetries)
+	}
+}
+
+func TestEnvOverridesConfigFile(t *testing.T) {
+	// Create a config file with profile=personal
+	dir := t.TempDir()
+	configPath := filepath.Join(dir, "config.yaml")
+	content := []byte("profile: personal\n")
+	if err := os.WriteFile(configPath, content, 0644); err != nil {
+		t.Fatalf("failed to write temp config: %v", err)
+	}
+
+	t.Setenv("TRELLO_CONFIG_PATH", configPath)
+	t.Setenv("TRELLO_PROFILE", "work")
+
+	cfg := config.Load()
+
+	// Env should override config file
+	if cfg.Profile != "work" {
+		t.Errorf("Profile = %q, want %q (env should override config file)", cfg.Profile, "work")
 	}
 }
