@@ -567,8 +567,30 @@ This keeps command handlers thin and keeps the HTTP and contract logic reusable.
 - `path/filepath`
 - `log/slog` or `log`
 
-### Additional implementation dependency
-Select a small credential-store library only if needed to back the credential abstraction on each platform.
+### Credential storage
+
+- `github.com/zalando/go-keyring`
+
+**Role:** OS-native credential storage backing the credential-store abstraction
+
+Why:
+
+- provides `Set`, `Get`, `Delete`, and `DeleteAll` against the OS keyring
+- supports macOS Keychain, Windows Credential Manager, and Linux dbus Secret Service
+- no CGo dependency — statically linked binaries work without extra toolchain setup
+- small surface area: four functions, two sentinel errors (`ErrNotFound`, `ErrSetDataTooBig`)
+- maps cleanly to the credential abstraction layer defined in section 4
+
+Usage contract:
+
+- store API key and token as separate entries under a service name scoped to the CLI and active profile
+- `trello auth set` and `trello auth login` write credentials via `keyring.Set`
+- command execution reads credentials via `keyring.Get`
+- `trello auth clear` removes credentials via `keyring.Delete`
+- `keyring.ErrNotFound` maps to `AUTH_REQUIRED` in the contract layer
+
+Fallback rule:
+If the OS keyring is unavailable (headless CI, containers, WSL without dbus), the credential-store abstraction should fall back to an explicit opt-in encrypted file store or environment variable injection — never to silent plaintext config.
 
 Rule:
 Do not import five helper libraries for a tool whose real job is still “call Trello, print JSON, leave.”
