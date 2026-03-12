@@ -57,7 +57,7 @@ func getMember(ctx context.Context, baseURL, apiKey, token string) (*Member, err
 	url := fmt.Sprintf("%s/1/members/me?key=%s&token=%s", baseURL, apiKey, token)
 	req, err := http.NewRequestWithContext(ctx, http.MethodGet, url, nil)
 	if err != nil {
-		return nil, err
+		return nil, contract.NewError(contract.HTTPError, fmt.Sprintf("failed to create member request: %v", err))
 	}
 
 	client := &http.Client{Timeout: 10 * time.Second}
