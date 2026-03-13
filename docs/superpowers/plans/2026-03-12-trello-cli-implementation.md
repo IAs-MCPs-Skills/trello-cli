@@ -5161,8 +5161,8 @@ func (c *Client) DeleteComment(ctx context.Context, actionID string) error {
 }
 ```
 
-- [ ] **Step 1-4: Write tests, implement, verify**
-- [ ] **Step 5: Commit**
+- [x] **Step 1-4: Write tests, implement, verify**
+- [x] **Step 5: Commit**
 
 ```bash
 git add internal/trello/comments.go internal/trello/comments_test.go internal/trello/client.go

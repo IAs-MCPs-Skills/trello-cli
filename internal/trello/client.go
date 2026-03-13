@@ -224,18 +224,6 @@ func (c *Client) do(ctx context.Context, method, path string, params map[string]
 var _ API = (*Client)(nil)
 
 // Stub methods — implemented in resource-specific files.
-func (c *Client) ListComments(ctx context.Context, cardID string) ([]Comment, error) { return nil, nil }
-
-func (c *Client) AddComment(ctx context.Context, cardID, text string) (Comment, error) {
-	return Comment{}, nil
-}
-
-func (c *Client) UpdateComment(ctx context.Context, actionID, text string) (Comment, error) {
-	return Comment{}, nil
-}
-
-func (c *Client) DeleteComment(ctx context.Context, actionID string) error { return nil }
-
 func (c *Client) ListChecklists(ctx context.Context, cardID string) ([]Checklist, error) {
 	return nil, nil
 }
