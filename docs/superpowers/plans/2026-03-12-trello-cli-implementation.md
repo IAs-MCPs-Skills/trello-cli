@@ -162,7 +162,7 @@ git commit -m "feat: initialize Go module with directory structure and dependenc
 - Create: `internal/contract/errors.go`
 - Create: `internal/contract/errors_test.go`
 
-- [ ] **Step 1: Write the failing tests**
+- [x] **Step 1: Write the failing tests**
 
 Create `internal/contract/errors_test.go`:
 ```go
@@ -238,7 +238,7 @@ func TestNewContractError(t *testing.T) {
 }
 ```
 
-- [ ] **Step 2: Run tests to verify they fail**
+- [x] **Step 2: Run tests to verify they fail**
 
 Run: `go test ./internal/contract/ -v`
 Expected: compilation failure — `contract` package doesn't exist yet
@@ -4170,7 +4170,7 @@ func TestNoRetryOnNon429Errors(t *testing.T) {
 Run: `go test ./internal/trello/ -run TestRetry -v`
 Expected: failures — no retry logic exists yet
 
-- [ ] **Step 3: Write retry implementation**
+- [x] **Step 3: Write retry implementation**
 
 Create `internal/trello/retry.go`:
 ```go
@@ -4216,7 +4216,7 @@ func waitForRetry(ctx context.Context, attempt int) error {
 }
 ```
 
-- [ ] **Step 4: Integrate retry into client.do()**
+- [x] **Step 4: Integrate retry into client.do()**
 
 Modify `internal/trello/client.go` — replace the `do` method with a retry-aware version:
 
@@ -4297,17 +4297,17 @@ func (c *Client) do(ctx context.Context, method, path string, params map[string]
 }
 ```
 
-- [ ] **Step 5: Run retry tests to verify they pass**
+- [x] **Step 5: Run retry tests to verify they pass**
 
 Run: `go test ./internal/trello/ -run TestRetry -v`
 Expected: all 5 tests PASS
 
-- [ ] **Step 6: Run full trello package tests**
+- [x] **Step 6: Run full trello package tests**
 
 Run: `go test ./internal/trello/ -v`
 Expected: all tests PASS
 
-- [ ] **Step 7: Commit**
+- [x] **Step 7: Commit**
 
 ```bash
 git add internal/trello/retry.go internal/trello/retry_test.go internal/trello/client.go

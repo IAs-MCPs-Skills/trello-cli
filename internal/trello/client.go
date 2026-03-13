@@ -105,36 +105,63 @@ func (c *Client) buildURL(path string, params map[string]string) string {
 func (c *Client) do(ctx context.Context, method, path string, params map[string]string, result any) error {
 	fullURL := c.buildURL(path, params)
 
-	req, err := http.NewRequestWithContext(ctx, method, fullURL, nil)
-	if err != nil {
-		return fmt.Errorf("failed to create request: %w", err)
+	maxAttempts := 1 + c.opts.MaxRetries
+	if maxAttempts < 1 {
+		maxAttempts = 1
+	}
+	if isMutation(method) && !c.opts.RetryMutations {
+		maxAttempts = 1
 	}
 
-	start := time.Now()
-	if c.opts.Verbose {
-		logURL := c.baseURL + path
-		slog.Debug("trello request", "method", method, "url", logURL)
-	}
-
-	resp, err := c.httpClient.Do(req)
-	if err != nil {
-		return fmt.Errorf("request failed: %w", err)
-	}
-	defer resp.Body.Close()
-
-	if c.opts.Verbose {
-		slog.Debug("trello response", "status", resp.StatusCode, "duration", time.Since(start))
-	}
-
-	if resp.StatusCode >= http.StatusBadRequest {
-		return mapHTTPError(resp)
-	}
-
-	if result != nil {
-		if err := json.NewDecoder(resp.Body).Decode(result); err != nil {
-			return fmt.Errorf("failed to decode response: %w", err)
+	var lastErr error
+	for attempt := 0; attempt < maxAttempts; attempt++ {
+		if attempt > 0 {
+			if err := waitForRetry(ctx, attempt-1); err != nil {
+				return err
+			}
 		}
+
+		req, err := http.NewRequestWithContext(ctx, method, fullURL, nil)
+		if err != nil {
+			return fmt.Errorf("failed to create request: %w", err)
+		}
+
+		start := time.Now()
+		if c.opts.Verbose {
+			logURL := c.baseURL + path
+			slog.Debug("trello request", "method", method, "url", logURL, "attempt", attempt+1)
+		}
+
+		resp, err := c.httpClient.Do(req)
+		if err != nil {
+			return fmt.Errorf("request failed: %w", err)
+		}
+
+		if c.opts.Verbose {
+			slog.Debug("trello response", "status", resp.StatusCode, "duration", time.Since(start), "attempt", attempt+1)
+		}
+
+		if resp.StatusCode >= http.StatusBadRequest {
+			lastErr = mapHTTPError(resp)
+			resp.Body.Close()
+			if shouldRetry(resp.StatusCode) && attempt < maxAttempts-1 {
+				continue
+			}
+			return lastErr
+		}
+
+		if result != nil {
+			if err := json.NewDecoder(resp.Body).Decode(result); err != nil {
+				resp.Body.Close()
+				return fmt.Errorf("failed to decode response: %w", err)
+			}
+		}
+		resp.Body.Close()
+		return nil
 	}
 
-	return nil
+	if lastErr != nil {
+		return lastErr
+	}
+	return fmt.Errorf("request failed after %d attempts", maxAttempts)
 }
