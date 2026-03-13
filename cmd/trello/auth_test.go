@@ -119,6 +119,15 @@ func setupTestAuth(t *testing.T) {
 	resetPathFlag([]string{"checklists", "items", "update"}, "state", "")
 	resetPathFlag([]string{"checklists", "items", "delete"}, "checklist", "")
 	resetPathFlag([]string{"checklists", "items", "delete"}, "item", "")
+	resetSubFlag("attachments", "list", "card", "")
+	resetSubFlag("attachments", "add-file", "card", "")
+	resetSubFlag("attachments", "add-file", "path", "")
+	resetSubFlag("attachments", "add-file", "name", "")
+	resetSubFlag("attachments", "add-url", "card", "")
+	resetSubFlag("attachments", "add-url", "url", "")
+	resetSubFlag("attachments", "add-url", "name", "")
+	resetSubFlag("attachments", "delete", "card", "")
+	resetSubFlag("attachments", "delete", "attachment", "")
 	_ = resetFlag
 }
 
