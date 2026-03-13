@@ -5291,8 +5291,8 @@ var checklistsItemsCmd = &cobra.Command{
 // checklistsItemsCmd.AddCommand(checklistsItemsAddCmd, ...)
 ```
 
-- [ ] **Step 1-4: Write tests, implement, verify**
-- [ ] **Step 5: Commit**
+- [x] **Step 1-4: Write tests, implement, verify**
+- [x] **Step 5: Commit**
 
 ```bash
 git add cmd/trello/checklists.go cmd/trello/checklists_test.go

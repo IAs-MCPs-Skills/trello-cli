@@ -56,6 +56,21 @@ func setupTestAuth(t *testing.T) {
 		}
 		flag.Changed = false
 	}
+	resetPathFlag := func(path []string, flagName, value string) {
+		t.Helper()
+		cmd, _, err := rootCmd.Find(path)
+		if err != nil {
+			return
+		}
+		flag := cmd.Flags().Lookup(flagName)
+		if flag == nil {
+			return
+		}
+		if err := cmd.Flags().Set(flagName, value); err != nil {
+			t.Fatalf("failed to reset %v --%s flag: %v", path, flagName, err)
+		}
+		flag.Changed = false
+	}
 	resetSubFlag("boards", "get", "board", "")
 	resetSubFlag("lists", "list", "board", "")
 	resetSubFlag("lists", "create", "board", "")
@@ -93,6 +108,17 @@ func setupTestAuth(t *testing.T) {
 	resetSubFlag("comments", "update", "action", "")
 	resetSubFlag("comments", "update", "text", "")
 	resetSubFlag("comments", "delete", "action", "")
+	resetSubFlag("checklists", "list", "card", "")
+	resetSubFlag("checklists", "create", "card", "")
+	resetSubFlag("checklists", "create", "name", "")
+	resetSubFlag("checklists", "delete", "checklist", "")
+	resetPathFlag([]string{"checklists", "items", "add"}, "checklist", "")
+	resetPathFlag([]string{"checklists", "items", "add"}, "name", "")
+	resetPathFlag([]string{"checklists", "items", "update"}, "card", "")
+	resetPathFlag([]string{"checklists", "items", "update"}, "item", "")
+	resetPathFlag([]string{"checklists", "items", "update"}, "state", "")
+	resetPathFlag([]string{"checklists", "items", "delete"}, "checklist", "")
+	resetPathFlag([]string{"checklists", "items", "delete"}, "item", "")
 	_ = resetFlag
 }
 

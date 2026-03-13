@@ -32,6 +32,12 @@ type mockAPI struct {
 	addCommentFn       func(ctx context.Context, cardID, text string) (trello.Comment, error)
 	updateCommentFn    func(ctx context.Context, actionID, text string) (trello.Comment, error)
 	deleteCommentFn    func(ctx context.Context, actionID string) error
+	listChecklistsFn   func(ctx context.Context, cardID string) ([]trello.Checklist, error)
+	createChecklistFn  func(ctx context.Context, cardID, name string) (trello.Checklist, error)
+	deleteChecklistFn  func(ctx context.Context, checklistID string) error
+	addCheckItemFn     func(ctx context.Context, checklistID, name string) (trello.CheckItem, error)
+	updateCheckItemFn  func(ctx context.Context, cardID, itemID, state string) (trello.CheckItem, error)
+	deleteCheckItemFn  func(ctx context.Context, checklistID, itemID string) error
 }
 
 func (m *mockAPI) ListBoards(ctx context.Context) ([]trello.Board, error) {
