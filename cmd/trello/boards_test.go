@@ -13,13 +13,21 @@ import (
 // mockAPI implements trello.API for command testing.
 type mockAPI struct {
 	trello.API
-	listBoardsFn  func(ctx context.Context) ([]trello.Board, error)
-	getBoardFn    func(ctx context.Context, id string) (trello.Board, error)
-	listListsFn   func(ctx context.Context, boardID string) ([]trello.List, error)
-	createListFn  func(ctx context.Context, boardID, name string) (trello.List, error)
-	updateListFn  func(ctx context.Context, listID string, params trello.UpdateListParams) (trello.List, error)
-	archiveListFn func(ctx context.Context, listID string) (trello.List, error)
-	moveListFn    func(ctx context.Context, listID, boardID string, pos *float64) (trello.List, error)
+	listBoardsFn       func(ctx context.Context) ([]trello.Board, error)
+	getBoardFn         func(ctx context.Context, id string) (trello.Board, error)
+	listListsFn        func(ctx context.Context, boardID string) ([]trello.List, error)
+	createListFn       func(ctx context.Context, boardID, name string) (trello.List, error)
+	updateListFn       func(ctx context.Context, listID string, params trello.UpdateListParams) (trello.List, error)
+	archiveListFn      func(ctx context.Context, listID string) (trello.List, error)
+	moveListFn         func(ctx context.Context, listID, boardID string, pos *float64) (trello.List, error)
+	listCardsByBoardFn func(ctx context.Context, boardID string) ([]trello.Card, error)
+	listCardsByListFn  func(ctx context.Context, listID string) ([]trello.Card, error)
+	getCardFn          func(ctx context.Context, cardID string) (trello.Card, error)
+	createCardFn       func(ctx context.Context, params trello.CreateCardParams) (trello.Card, error)
+	updateCardFn       func(ctx context.Context, cardID string, params trello.UpdateCardParams) (trello.Card, error)
+	moveCardFn         func(ctx context.Context, cardID, listID string, pos *float64) (trello.Card, error)
+	archiveCardFn      func(ctx context.Context, cardID string) (trello.Card, error)
+	deleteCardFn       func(ctx context.Context, cardID string) error
 }
 
 func (m *mockAPI) ListBoards(ctx context.Context) ([]trello.Board, error) {

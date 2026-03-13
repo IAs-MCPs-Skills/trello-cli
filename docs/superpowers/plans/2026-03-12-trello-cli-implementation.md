@@ -5095,8 +5095,8 @@ Commands, validation patterns, and required test cases:
   - Test: success returns DeleteResult JSON
   - Test: missing `--card` returns VALIDATION_ERROR
 
-- [ ] **Step 1-4: Write tests, implement, verify**
-- [ ] **Step 5: Commit**
+- [x] **Step 1-4: Write tests, implement, verify**
+- [x] **Step 5: Commit**
 
 ```bash
 git add cmd/trello/cards.go cmd/trello/cards_test.go
