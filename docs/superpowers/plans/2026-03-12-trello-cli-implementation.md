@@ -4928,9 +4928,9 @@ Commands and required test cases:
   - Test: missing `--list` returns VALIDATION_ERROR
   - Test: missing `--board` returns VALIDATION_ERROR
 
-- [ ] **Step 1-4: Write tests, implement, verify**
+- [x] **Step 1-4: Write tests, implement, verify**
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 
 ```bash
 git add cmd/trello/lists.go cmd/trello/lists_test.go

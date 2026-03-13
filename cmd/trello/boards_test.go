@@ -13,8 +13,13 @@ import (
 // mockAPI implements trello.API for command testing.
 type mockAPI struct {
 	trello.API
-	listBoardsFn func(ctx context.Context) ([]trello.Board, error)
-	getBoardFn   func(ctx context.Context, id string) (trello.Board, error)
+	listBoardsFn  func(ctx context.Context) ([]trello.Board, error)
+	getBoardFn    func(ctx context.Context, id string) (trello.Board, error)
+	listListsFn   func(ctx context.Context, boardID string) ([]trello.List, error)
+	createListFn  func(ctx context.Context, boardID, name string) (trello.List, error)
+	updateListFn  func(ctx context.Context, listID string, params trello.UpdateListParams) (trello.List, error)
+	archiveListFn func(ctx context.Context, listID string) (trello.List, error)
+	moveListFn    func(ctx context.Context, listID, boardID string, pos *float64) (trello.List, error)
 }
 
 func (m *mockAPI) ListBoards(ctx context.Context) ([]trello.Board, error) {

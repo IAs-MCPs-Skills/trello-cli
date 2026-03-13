@@ -22,6 +22,52 @@ func setupTestAuth(t *testing.T) {
 	if err := authSetCmd.Flags().Set("token", ""); err != nil {
 		t.Fatalf("failed to reset token flag: %v", err)
 	}
+	resetFlag := func(cmdName, flagName, value string) {
+		t.Helper()
+		cmd, _, err := rootCmd.Find([]string{cmdName})
+		if err != nil {
+			return
+		}
+		flag := cmd.Flags().Lookup(flagName)
+		if flag == nil {
+			return
+		}
+		if err := cmd.Flags().Set(flagName, value); err != nil {
+			t.Fatalf("failed to reset %s --%s flag: %v", cmdName, flagName, err)
+		}
+		flag.Changed = false
+	}
+	resetSubFlag := func(parentName, childName, flagName, value string) {
+		t.Helper()
+		parent, _, err := rootCmd.Find([]string{parentName})
+		if err != nil {
+			return
+		}
+		cmd, _, err := parent.Find([]string{childName})
+		if err != nil {
+			return
+		}
+		flag := cmd.Flags().Lookup(flagName)
+		if flag == nil {
+			return
+		}
+		if err := cmd.Flags().Set(flagName, value); err != nil {
+			t.Fatalf("failed to reset %s %s --%s flag: %v", parentName, childName, flagName, err)
+		}
+		flag.Changed = false
+	}
+	resetSubFlag("boards", "get", "board", "")
+	resetSubFlag("lists", "list", "board", "")
+	resetSubFlag("lists", "create", "board", "")
+	resetSubFlag("lists", "create", "name", "")
+	resetSubFlag("lists", "update", "list", "")
+	resetSubFlag("lists", "update", "name", "")
+	resetSubFlag("lists", "update", "pos", "0")
+	resetSubFlag("lists", "archive", "list", "")
+	resetSubFlag("lists", "move", "list", "")
+	resetSubFlag("lists", "move", "board", "")
+	resetSubFlag("lists", "move", "pos", "0")
+	_ = resetFlag
 }
 
 func TestAuthSetCommand(t *testing.T) {
