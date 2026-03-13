@@ -63,6 +63,8 @@ var boardsGetCmd = &cobra.Command{
 var boardsCreateCmd = &cobra.Command{
 	Use:   "create",
 	Short: "Create a board",
+	Example: "  trello boards create --name \"Project Alpha\"\n" +
+		"  trello boards create --name \"Project Alpha\" --desc \"Delivery tracker\" --default-lists --default-labels",
 	RunE: func(cmd *cobra.Command, args []string) error {
 		name, _ := cmd.Flags().GetString("name")
 		desc, _ := cmd.Flags().GetString("desc")

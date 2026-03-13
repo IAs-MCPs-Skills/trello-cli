@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"context"
 	"encoding/json"
+	"strings"
 	"testing"
 
 	"github.com/brettmcdowell/trello-cli/internal/credentials"
@@ -47,6 +48,18 @@ type mockAPI struct {
 	createLabelFn          func(ctx context.Context, boardID, name, color string) (trello.Label, error)
 	addLabelToCardFn       func(ctx context.Context, cardID, labelID string) error
 	removeLabelFromCardFn  func(ctx context.Context, cardID, labelID string) error
+	listCustomFieldsByBoardFn  func(ctx context.Context, boardID string) ([]trello.CustomField, error)
+	getCustomFieldFn           func(ctx context.Context, fieldID string) (trello.CustomField, error)
+	createCustomFieldFn        func(ctx context.Context, params trello.CreateCustomFieldParams) (trello.CustomField, error)
+	updateCustomFieldFn        func(ctx context.Context, fieldID string, params trello.UpdateCustomFieldParams) (trello.CustomField, error)
+	deleteCustomFieldFn        func(ctx context.Context, fieldID string) error
+	listCustomFieldOptionsFn   func(ctx context.Context, fieldID string) ([]trello.CustomFieldOption, error)
+	createCustomFieldOptionFn  func(ctx context.Context, fieldID string, params trello.CreateCustomFieldOptionParams) (trello.CustomFieldOption, error)
+	updateCustomFieldOptionFn  func(ctx context.Context, fieldID, optionID string, params trello.UpdateCustomFieldOptionParams) (trello.CustomFieldOption, error)
+	deleteCustomFieldOptionFn  func(ctx context.Context, fieldID, optionID string) error
+	listCardCustomFieldItemsFn func(ctx context.Context, cardID string) ([]trello.CardCustomFieldItem, error)
+	setCardCustomFieldItemFn   func(ctx context.Context, cardID, fieldID string, params trello.SetCardCustomFieldItemParams) (trello.CardCustomFieldItem, error)
+	clearCardCustomFieldItemFn func(ctx context.Context, cardID, fieldID string) error
 	listMembersFn          func(ctx context.Context, boardID string) ([]trello.Member, error)
 	addMemberToCardFn      func(ctx context.Context, cardID, memberID string) error
 	removeMemberFromCardFn func(ctx context.Context, cardID, memberID string) error
@@ -73,6 +86,90 @@ func (m *mockAPI) CreateBoard(ctx context.Context, params trello.CreateBoardPara
 		return m.createBoardFn(ctx, params)
 	}
 	return trello.Board{}, nil
+}
+
+func (m *mockAPI) ListCustomFieldsByBoard(ctx context.Context, boardID string) ([]trello.CustomField, error) {
+	if m.listCustomFieldsByBoardFn != nil {
+		return m.listCustomFieldsByBoardFn(ctx, boardID)
+	}
+	return nil, nil
+}
+
+func (m *mockAPI) GetCustomField(ctx context.Context, fieldID string) (trello.CustomField, error) {
+	if m.getCustomFieldFn != nil {
+		return m.getCustomFieldFn(ctx, fieldID)
+	}
+	return trello.CustomField{}, nil
+}
+
+func (m *mockAPI) CreateCustomField(ctx context.Context, params trello.CreateCustomFieldParams) (trello.CustomField, error) {
+	if m.createCustomFieldFn != nil {
+		return m.createCustomFieldFn(ctx, params)
+	}
+	return trello.CustomField{}, nil
+}
+
+func (m *mockAPI) UpdateCustomField(ctx context.Context, fieldID string, params trello.UpdateCustomFieldParams) (trello.CustomField, error) {
+	if m.updateCustomFieldFn != nil {
+		return m.updateCustomFieldFn(ctx, fieldID, params)
+	}
+	return trello.CustomField{}, nil
+}
+
+func (m *mockAPI) DeleteCustomField(ctx context.Context, fieldID string) error {
+	if m.deleteCustomFieldFn != nil {
+		return m.deleteCustomFieldFn(ctx, fieldID)
+	}
+	return nil
+}
+
+func (m *mockAPI) ListCustomFieldOptions(ctx context.Context, fieldID string) ([]trello.CustomFieldOption, error) {
+	if m.listCustomFieldOptionsFn != nil {
+		return m.listCustomFieldOptionsFn(ctx, fieldID)
+	}
+	return nil, nil
+}
+
+func (m *mockAPI) CreateCustomFieldOption(ctx context.Context, fieldID string, params trello.CreateCustomFieldOptionParams) (trello.CustomFieldOption, error) {
+	if m.createCustomFieldOptionFn != nil {
+		return m.createCustomFieldOptionFn(ctx, fieldID, params)
+	}
+	return trello.CustomFieldOption{}, nil
+}
+
+func (m *mockAPI) UpdateCustomFieldOption(ctx context.Context, fieldID, optionID string, params trello.UpdateCustomFieldOptionParams) (trello.CustomFieldOption, error) {
+	if m.updateCustomFieldOptionFn != nil {
+		return m.updateCustomFieldOptionFn(ctx, fieldID, optionID, params)
+	}
+	return trello.CustomFieldOption{}, nil
+}
+
+func (m *mockAPI) DeleteCustomFieldOption(ctx context.Context, fieldID, optionID string) error {
+	if m.deleteCustomFieldOptionFn != nil {
+		return m.deleteCustomFieldOptionFn(ctx, fieldID, optionID)
+	}
+	return nil
+}
+
+func (m *mockAPI) ListCardCustomFieldItems(ctx context.Context, cardID string) ([]trello.CardCustomFieldItem, error) {
+	if m.listCardCustomFieldItemsFn != nil {
+		return m.listCardCustomFieldItemsFn(ctx, cardID)
+	}
+	return nil, nil
+}
+
+func (m *mockAPI) SetCardCustomFieldItem(ctx context.Context, cardID, fieldID string, params trello.SetCardCustomFieldItemParams) (trello.CardCustomFieldItem, error) {
+	if m.setCardCustomFieldItemFn != nil {
+		return m.setCardCustomFieldItemFn(ctx, cardID, fieldID, params)
+	}
+	return trello.CardCustomFieldItem{}, nil
+}
+
+func (m *mockAPI) ClearCardCustomFieldItem(ctx context.Context, cardID, fieldID string) error {
+	if m.clearCardCustomFieldItemFn != nil {
+		return m.clearCardCustomFieldItemFn(ctx, cardID, fieldID)
+	}
+	return nil
 }
 
 func TestBoardsListCommand(t *testing.T) {
@@ -225,4 +322,44 @@ func TestBoardsCreateMissingName(t *testing.T) {
 	setupTestAuth(t)
 	credStore.Set("default", credentials.Credentials{APIKey: "k", Token: "t", AuthMode: "manual"})
 	assertContractCode(t, executeRootArgs("boards", "create"), "VALIDATION_ERROR")
+}
+
+func TestBoardsHelpIncludesCreate(t *testing.T) {
+	setupTestAuth(t)
+
+	var buf bytes.Buffer
+	rootCmd.SetOut(&buf)
+	rootCmd.SetErr(&buf)
+	rootCmd.SetArgs([]string{"boards", "--help"})
+
+	if err := rootCmd.Execute(); err != nil {
+		t.Fatalf("boards help failed: %v", err)
+	}
+
+	help := buf.String()
+	for _, want := range []string{"create", "Create a board"} {
+		if !strings.Contains(help, want) {
+			t.Fatalf("help missing %q\nhelp:\n%s", want, help)
+		}
+	}
+}
+
+func TestBoardsCreateHelpIncludesFlags(t *testing.T) {
+	setupTestAuth(t)
+
+	var buf bytes.Buffer
+	rootCmd.SetOut(&buf)
+	rootCmd.SetErr(&buf)
+	rootCmd.SetArgs([]string{"boards", "create", "--help"})
+
+	if err := rootCmd.Execute(); err != nil {
+		t.Fatalf("boards create help failed: %v", err)
+	}
+
+	help := buf.String()
+	for _, want := range []string{"--name", "--desc", "--default-lists", "--default-labels", "--organization", "--source-board"} {
+		if !strings.Contains(help, want) {
+			t.Fatalf("help missing %q\nhelp:\n%s", want, help)
+		}
+	}
 }

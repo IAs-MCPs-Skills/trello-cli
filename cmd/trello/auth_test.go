@@ -154,6 +154,48 @@ func setupTestAuth(t *testing.T) {
 	resetSubFlag("members", "remove", "member", "")
 	resetSubFlag("search", "cards", "query", "")
 	resetSubFlag("search", "boards", "query", "")
+	// custom-fields definition subcommands
+	resetSubFlag("custom-fields", "list", "board", "")
+	resetSubFlag("custom-fields", "get", "field", "")
+	resetSubFlag("custom-fields", "create", "board", "")
+	resetSubFlag("custom-fields", "create", "name", "")
+	resetSubFlag("custom-fields", "create", "type", "")
+	resetSubFlag("custom-fields", "create", "card-front", "false")
+	// Reset StringArray flag for custom-fields create --option
+	if cfCreate, _, err := rootCmd.Find([]string{"custom-fields", "create"}); err == nil {
+		if f := cfCreate.Flags().Lookup("option"); f != nil {
+			if r, ok := f.Value.(interface{ Replace([]string) error }); ok {
+				r.Replace(nil)
+			}
+			f.Changed = false
+		}
+	}
+	resetSubFlag("custom-fields", "update", "field", "")
+	resetSubFlag("custom-fields", "update", "name", "")
+	resetSubFlag("custom-fields", "update", "card-front", "false")
+	resetSubFlag("custom-fields", "delete", "field", "")
+	// custom-fields options subcommands
+	resetPathFlag([]string{"custom-fields", "options", "list"}, "field", "")
+	resetPathFlag([]string{"custom-fields", "options", "add"}, "field", "")
+	resetPathFlag([]string{"custom-fields", "options", "add"}, "text", "")
+	resetPathFlag([]string{"custom-fields", "options", "add"}, "color", "")
+	resetPathFlag([]string{"custom-fields", "options", "update"}, "field", "")
+	resetPathFlag([]string{"custom-fields", "options", "update"}, "option", "")
+	resetPathFlag([]string{"custom-fields", "options", "update"}, "text", "")
+	resetPathFlag([]string{"custom-fields", "options", "update"}, "color", "")
+	resetPathFlag([]string{"custom-fields", "options", "delete"}, "field", "")
+	resetPathFlag([]string{"custom-fields", "options", "delete"}, "option", "")
+	// custom-fields items subcommands
+	resetPathFlag([]string{"custom-fields", "items", "list"}, "card", "")
+	resetPathFlag([]string{"custom-fields", "items", "set"}, "card", "")
+	resetPathFlag([]string{"custom-fields", "items", "set"}, "field", "")
+	resetPathFlag([]string{"custom-fields", "items", "set"}, "text", "")
+	resetPathFlag([]string{"custom-fields", "items", "set"}, "number", "")
+	resetPathFlag([]string{"custom-fields", "items", "set"}, "date", "")
+	resetPathFlag([]string{"custom-fields", "items", "set"}, "checked", "")
+	resetPathFlag([]string{"custom-fields", "items", "set"}, "option", "")
+	resetPathFlag([]string{"custom-fields", "items", "clear"}, "card", "")
+	resetPathFlag([]string{"custom-fields", "items", "clear"}, "field", "")
 	_ = resetFlag
 }
 
