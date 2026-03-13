@@ -6,8 +6,8 @@ import (
 	"encoding/json"
 	"testing"
 
-	"github.com/brettmcdowell/trello-cli/internal/credentials"
-	"github.com/brettmcdowell/trello-cli/internal/trello"
+	"github.com/Scale-Flow/trello-cli/internal/credentials"
+	"github.com/Scale-Flow/trello-cli/internal/trello"
 )
 
 func TestChecklistsListCommand(t *testing.T) {

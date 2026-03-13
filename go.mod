@@ -1,4 +1,4 @@
-module github.com/brettmcdowell/trello-cli
+module github.com/Scale-Flow/trello-cli
 
 go 1.26.1
 

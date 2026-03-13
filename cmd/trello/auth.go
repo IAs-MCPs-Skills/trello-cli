@@ -4,9 +4,9 @@ import (
 	"context"
 	"io"
 
-	"github.com/brettmcdowell/trello-cli/internal/auth"
-	"github.com/brettmcdowell/trello-cli/internal/contract"
-	"github.com/brettmcdowell/trello-cli/internal/credentials"
+	"github.com/Scale-Flow/trello-cli/internal/auth"
+	"github.com/Scale-Flow/trello-cli/internal/contract"
+	"github.com/Scale-Flow/trello-cli/internal/credentials"
 	"github.com/spf13/cobra"
 )
 

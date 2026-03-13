@@ -1,6 +1,6 @@
 package auth
 
-import "github.com/brettmcdowell/trello-cli/internal/credentials"
+import "github.com/Scale-Flow/trello-cli/internal/credentials"
 
 // SetResult is the response shape for auth set.
 type SetResult struct {

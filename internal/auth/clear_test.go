@@ -4,8 +4,8 @@ import (
 	"encoding/json"
 	"testing"
 
-	"github.com/brettmcdowell/trello-cli/internal/auth"
-	"github.com/brettmcdowell/trello-cli/internal/credentials"
+	"github.com/Scale-Flow/trello-cli/internal/auth"
+	"github.com/Scale-Flow/trello-cli/internal/credentials"
 )
 
 func TestClearRemovesCredentials(t *testing.T) {

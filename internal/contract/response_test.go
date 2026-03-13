@@ -5,7 +5,7 @@ import (
 	"encoding/json"
 	"testing"
 
-	"github.com/brettmcdowell/trello-cli/internal/contract"
+	"github.com/Scale-Flow/trello-cli/internal/contract"
 )
 
 func TestSuccessEnvelope(t *testing.T) {

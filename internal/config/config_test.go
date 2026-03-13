@@ -6,7 +6,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/brettmcdowell/trello-cli/internal/config"
+	"github.com/Scale-Flow/trello-cli/internal/config"
 )
 
 func TestDefaults(t *testing.T) {

@@ -7,7 +7,7 @@ import (
 	"net/http/httptest"
 	"testing"
 
-	"github.com/brettmcdowell/trello-cli/internal/trello"
+	"github.com/Scale-Flow/trello-cli/internal/trello"
 )
 
 func TestListCustomFieldsByBoard(t *testing.T) {

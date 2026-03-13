@@ -3,7 +3,7 @@ package contract_test
 import (
 	"testing"
 
-	"github.com/brettmcdowell/trello-cli/internal/contract"
+	"github.com/Scale-Flow/trello-cli/internal/contract"
 )
 
 func TestContractErrorImplementsError(t *testing.T) {
