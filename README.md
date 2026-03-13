@@ -1,0 +1,78 @@
+# Trello CLI
+
+A cross-platform Go CLI for Trello with machine-friendly JSON output.
+
+Every command writes a JSON envelope to `stdout`, which makes the CLI useful both for terminal users and for automation that needs predictable responses.
+
+## Highlights
+
+- Stable JSON success and error envelopes
+- Interactive browser login and manual credential setup
+- Broad Trello command coverage for boards, lists, cards, comments, labels, members, checklists, attachments, and search
+- Single-binary Go CLI with minimal runtime requirements
+
+## Build
+
+```bash
+go build -o bin/trello ./cmd/trello
+```
+
+Or run it directly during development:
+
+```bash
+go run ./cmd/trello version
+```
+
+## Quick Start
+
+If you already have a Trello API key and token:
+
+```bash
+go run ./cmd/trello auth set --api-key "$TRELLO_API_KEY" --token "$TRELLO_TOKEN"
+go run ./cmd/trello auth status --pretty
+go run ./cmd/trello boards list --pretty
+```
+
+If you want to use interactive login:
+
+```bash
+export TRELLO_API_KEY="your-api-key"
+go run ./cmd/trello auth login
+```
+
+## Output Shape
+
+Success:
+
+```json
+{"ok":true,"data":{"version":"dev","commit":"unknown","date":"unknown"}}
+```
+
+Error:
+
+```json
+{"ok":false,"error":{"code":"VALIDATION_ERROR","message":"--board is required"}}
+```
+
+Use `--pretty` on any command to indent the JSON.
+
+## Common Commands
+
+```bash
+go run ./cmd/trello boards list
+go run ./cmd/trello lists list --board <board-id>
+go run ./cmd/trello cards list --list <list-id>
+go run ./cmd/trello cards create --list <list-id> --name "Follow up with customer"
+go run ./cmd/trello search cards --query "customer"
+```
+
+## Documentation
+
+- [Getting Started](/Users/brettmcdowell/Dev/Trello_CLI/docs/getting-started.md)
+- [Authentication](/Users/brettmcdowell/Dev/Trello_CLI/docs/concepts/authentication.md)
+- [JSON Output](/Users/brettmcdowell/Dev/Trello_CLI/docs/concepts/json-output.md)
+- [Errors](/Users/brettmcdowell/Dev/Trello_CLI/docs/concepts/errors.md)
+- [Configuration](/Users/brettmcdowell/Dev/Trello_CLI/docs/concepts/configuration.md)
+- [Command Reference](/Users/brettmcdowell/Dev/Trello_CLI/docs/commands/README.md)
+- [Examples](/Users/brettmcdowell/Dev/Trello_CLI/docs/examples/create-a-card.md)
+- [LLM Digest](/Users/brettmcdowell/Dev/Trello_CLI/LLM.md)
