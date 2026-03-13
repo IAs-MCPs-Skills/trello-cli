@@ -15,7 +15,8 @@ type Config struct {
 	Verbose        bool          `mapstructure:"verbose"`
 	Timeout        time.Duration `mapstructure:"timeout"`
 	MaxRetries     int           `mapstructure:"max_retries"`
-	RetryMutations bool          `mapstructure:"retry_mutations"`
+	RetryMutations   bool          `mapstructure:"retry_mutations"`
+	PairingServiceURL string        `mapstructure:"pairing_service_url"`
 }
 
 // Load reads configuration from file, environment, and defaults.
@@ -30,6 +31,7 @@ func Load() Config {
 	v.SetDefault("timeout", "15s")
 	v.SetDefault("max_retries", 3)
 	v.SetDefault("retry_mutations", false)
+	v.SetDefault("pairing_service_url", "https://connector.trello-cli.com")
 
 	// Environment binding
 	v.SetEnvPrefix("TRELLO")
