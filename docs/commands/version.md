@@ -14,9 +14,11 @@ trello version --pretty
 {
   "ok": true,
   "data": {
-    "version": "dev",
-    "commit": "unknown",
-    "date": "unknown"
+    "version": "1.0.0",
+    "commit": "abc1234",
+    "date": "2026-03-13T00:00:00Z"
   }
 }
 ```
+
+Version, commit, and date are injected at build time. Local development builds show `"dev"`, `"unknown"`, `"unknown"`. Release builds (via goreleaser) show the git tag, commit SHA, and build timestamp.
