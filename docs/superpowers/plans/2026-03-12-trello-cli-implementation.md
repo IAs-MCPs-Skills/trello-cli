@@ -3920,7 +3920,7 @@ git commit -m "feat: add Trello API client with auth injection and HTTP error ma
 **Files:**
 - Create: `internal/trello/errors_test.go`
 
-- [ ] **Step 1: Write the tests**
+- [x] **Step 1: Write the tests**
 
 Create `internal/trello/errors_test.go`:
 ```go
@@ -4018,12 +4018,12 @@ func TestHTTPError500(t *testing.T) {
 }
 ```
 
-- [ ] **Step 2: Run tests to verify they pass**
+- [x] **Step 2: Run tests to verify they pass**
 
 Run: `go test ./internal/trello/ -run "TestHTTPError" -v`
 Expected: all 4 tests PASS
 
-- [ ] **Step 3: Commit**
+- [x] **Step 3: Commit**
 
 ```bash
 git add internal/trello/errors_test.go
@@ -4182,7 +4182,7 @@ func TestNoRetryOnNon429Errors(t *testing.T) {
 Run: `go test ./internal/trello/ -run TestRetry -v`
 Expected: failures — no retry logic exists yet
 
-- [ ] **Step 3: Write retry implementation**
+- [x] **Step 3: Write retry implementation**
 
 Create `internal/trello/retry.go`:
 ```go
@@ -4228,7 +4228,7 @@ func waitForRetry(ctx context.Context, attempt int) error {
 }
 ```
 
-- [ ] **Step 4: Integrate retry into client.do()**
+- [x] **Step 4: Integrate retry into client.do()**
 
 Modify `internal/trello/client.go` — replace the `do` method with a retry-aware version:
 
@@ -4309,17 +4309,17 @@ func (c *Client) do(ctx context.Context, method, path string, params map[string]
 }
 ```
 
-- [ ] **Step 5: Run retry tests to verify they pass**
+- [x] **Step 5: Run retry tests to verify they pass**
 
 Run: `go test ./internal/trello/ -run TestRetry -v`
 Expected: all 5 tests PASS
 
-- [ ] **Step 6: Run full trello package tests**
+- [x] **Step 6: Run full trello package tests**
 
 Run: `go test ./internal/trello/ -v`
 Expected: all tests PASS
 
-- [ ] **Step 7: Commit**
+- [x] **Step 7: Commit**
 
 ```bash
 git add internal/trello/retry.go internal/trello/retry_test.go internal/trello/client.go
@@ -4333,7 +4333,7 @@ git commit -m "feat: add retry logic with exponential backoff and mutation safet
 **Files:**
 - Modify: `internal/trello/client.go`
 
-- [ ] **Step 1: Define the Client interface for mocking**
+- [x] **Step 1: Define the Client interface for mocking**
 
 Add to `internal/trello/client.go`:
 ```go
@@ -4392,7 +4392,7 @@ type API interface {
 }
 ```
 
-- [ ] **Step 2: Verify Client struct can satisfy the interface (compile check)**
+- [x] **Step 2: Verify Client struct can satisfy the interface (compile check)**
 
 Add a compile-time assertion at the bottom of `client.go`:
 ```go
@@ -4445,17 +4445,17 @@ func (c *Client) SearchBoards(ctx context.Context, query string) (BoardSearchRes
 func (c *Client) GetMe(ctx context.Context) (Member, error)                              { return Member{}, nil }
 ```
 
-- [ ] **Step 3: Verify compilation**
+- [x] **Step 3: Verify compilation**
 
 Run: `go build ./internal/trello/`
 Expected: successful compilation
 
-- [ ] **Step 4: Run full test suite**
+- [x] **Step 4: Run full test suite**
 
 Run: `go test ./... -v`
 Expected: all tests PASS
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 
 ```bash
 git add internal/trello/client.go
@@ -4555,12 +4555,12 @@ func TestGetBoard(t *testing.T) {
 }
 ```
 
-- [ ] **Step 2: Run tests to verify they fail** (stubs return nil/empty)
+- [x] **Step 2: Run tests to verify they fail** (stubs return nil/empty)
 
 Run: `go test ./internal/trello/ -run "TestListBoards|TestGetBoard" -v`
 Expected: FAIL (stubs return empty results)
 
-- [ ] **Step 3: Implement client methods**
+- [x] **Step 3: Implement client methods**
 
 Create `internal/trello/boards.go`:
 ```go
@@ -4586,12 +4586,12 @@ func (c *Client) GetBoard(ctx context.Context, boardID string) (Board, error) {
 
 Remove the `ListBoards` and `GetBoard` stubs from `client.go`.
 
-- [ ] **Step 4: Run tests**
+- [x] **Step 4: Run tests**
 
 Run: `go test ./internal/trello/ -run "TestListBoards|TestGetBoard" -v`
 Expected: PASS
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 
 ```bash
 git add internal/trello/boards.go internal/trello/boards_test.go internal/trello/client.go
@@ -4735,7 +4735,7 @@ func TestBoardsGetMissingFlag(t *testing.T) {
 Run: `go test ./cmd/trello/ -run TestBoards -v`
 Expected: compilation failure
 
-- [ ] **Step 3: Implement commands**
+- [x] **Step 3: Implement commands**
 
 Create `cmd/trello/boards.go`:
 ```go
@@ -4809,12 +4809,12 @@ func init() {
 }
 ```
 
-- [ ] **Step 4: Run tests**
+- [x] **Step 4: Run tests**
 
 Run: `go test ./cmd/trello/ -run TestBoards -v`
 Expected: all 4 tests PASS
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 
 ```bash
 git add cmd/trello/boards.go cmd/trello/boards_test.go
@@ -4829,7 +4829,7 @@ git commit -m "feat: add boards list and boards get commands"
 - Create: `internal/trello/lists.go`
 - Create: `internal/trello/lists_test.go`
 
-- [ ] **Step 1: Write failing tests**
+- [x] **Step 1: Write failing tests**
 
 Create `internal/trello/lists_test.go` with tests for all 5 list methods:
 - `TestListLists` — GET /1/boards/{id}/lists, verify path and decoded response
@@ -4838,9 +4838,9 @@ Create `internal/trello/lists_test.go` with tests for all 5 list methods:
 - `TestArchiveList` — PUT /1/lists/{id}, verify `closed=true` in query
 - `TestMoveList` — PUT /1/lists/{id}, verify `idBoard` and optional `pos` in query
 
-- [ ] **Step 2: Run tests to verify they fail**
+- [x] **Step 2: Run tests to verify they fail**
 
-- [ ] **Step 3: Implement methods**
+- [x] **Step 3: Implement methods**
 
 Create `internal/trello/lists.go`:
 ```go
@@ -4901,8 +4901,8 @@ func (c *Client) MoveList(ctx context.Context, listID, boardID string, pos *floa
 
 Remove list stubs from `client.go`.
 
-- [ ] **Step 4: Run tests, verify PASS**
-- [ ] **Step 5: Commit**
+- [x] **Step 4: Run tests, verify PASS**
+- [x] **Step 5: Commit**
 
 ```bash
 git add internal/trello/lists.go internal/trello/lists_test.go internal/trello/client.go
@@ -4940,9 +4940,9 @@ Commands and required test cases:
   - Test: missing `--list` returns VALIDATION_ERROR
   - Test: missing `--board` returns VALIDATION_ERROR
 
-- [ ] **Step 1-4: Write tests, implement, verify**
+- [x] **Step 1-4: Write tests, implement, verify**
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 
 ```bash
 git add cmd/trello/lists.go cmd/trello/lists_test.go
@@ -4957,7 +4957,7 @@ git commit -m "feat: add lists commands (list, create, update, archive, move)"
 - Create: `internal/trello/cards.go`
 - Create: `internal/trello/cards_test.go`
 
-- [ ] **Step 1: Write failing tests** for all 7 card methods:
+- [x] **Step 1: Write failing tests** for all 7 card methods:
 - `TestListCardsByBoard` — GET /1/boards/{id}/cards
 - `TestListCardsByList` — GET /1/lists/{id}/cards
 - `TestGetCard` — GET /1/cards/{id}
@@ -4967,7 +4967,7 @@ git commit -m "feat: add lists commands (list, create, update, archive, move)"
 - `TestArchiveCard` — PUT /1/cards/{id}, verify closed=true
 - `TestDeleteCard` — DELETE /1/cards/{id}
 
-- [ ] **Step 2: Implement methods**
+- [x] **Step 2: Implement methods**
 
 Create `internal/trello/cards.go`:
 ```go
@@ -5060,8 +5060,8 @@ func (c *Client) DeleteCard(ctx context.Context, cardID string) error {
 
 Remove card stubs from `client.go`.
 
-- [ ] **Step 3: Run tests, verify PASS**
-- [ ] **Step 4: Commit**
+- [x] **Step 3: Run tests, verify PASS**
+- [x] **Step 4: Commit**
 
 ```bash
 git add internal/trello/cards.go internal/trello/cards_test.go internal/trello/client.go
@@ -5107,8 +5107,8 @@ Commands, validation patterns, and required test cases:
   - Test: success returns DeleteResult JSON
   - Test: missing `--card` returns VALIDATION_ERROR
 
-- [ ] **Step 1-4: Write tests, implement, verify**
-- [ ] **Step 5: Commit**
+- [x] **Step 1-4: Write tests, implement, verify**
+- [x] **Step 5: Commit**
 
 ```bash
 git add cmd/trello/cards.go cmd/trello/cards_test.go
@@ -5173,8 +5173,8 @@ func (c *Client) DeleteComment(ctx context.Context, actionID string) error {
 }
 ```
 
-- [ ] **Step 1-4: Write tests, implement, verify**
-- [ ] **Step 5: Commit**
+- [x] **Step 1-4: Write tests, implement, verify**
+- [x] **Step 5: Commit**
 
 ```bash
 git add internal/trello/comments.go internal/trello/comments_test.go internal/trello/client.go
@@ -5198,8 +5198,8 @@ Commands:
 Response shapes for void operations:
 - `comments delete` returns `DeleteResult{Deleted: true, ID: actionID}` in the success envelope, same pattern as `cards delete`
 
-- [ ] **Step 1-4: Write tests, implement, verify**
-- [ ] **Step 5: Commit**
+- [x] **Step 1-4: Write tests, implement, verify**
+- [x] **Step 5: Commit**
 
 ```bash
 git add cmd/trello/comments.go cmd/trello/comments_test.go
@@ -5254,8 +5254,8 @@ func (c *Client) DeleteCheckItem(ctx context.Context, checklistID, itemID string
 }
 ```
 
-- [ ] **Step 1-4: Write tests, implement, verify**
-- [ ] **Step 5: Commit**
+- [x] **Step 1-4: Write tests, implement, verify**
+- [x] **Step 5: Commit**
 
 ```bash
 git add internal/trello/checklists.go internal/trello/checklists_test.go internal/trello/client.go
@@ -5303,8 +5303,8 @@ var checklistsItemsCmd = &cobra.Command{
 // checklistsItemsCmd.AddCommand(checklistsItemsAddCmd, ...)
 ```
 
-- [ ] **Step 1-4: Write tests, implement, verify**
-- [ ] **Step 5: Commit**
+- [x] **Step 1-4: Write tests, implement, verify**
+- [x] **Step 5: Commit**
 
 ```bash
 git add cmd/trello/checklists.go cmd/trello/checklists_test.go
@@ -5410,11 +5410,11 @@ func (c *Client) postMultipartFile(ctx context.Context, path, filePath string, p
 
 Additional imports needed: `"bytes"`, `"io"`, `"mime/multipart"`, `"os"`, `"path/filepath"`.
 
-- [ ] **Step 1-4: Write tests, implement, verify**
+- [x] **Step 1-4: Write tests, implement, verify**
 
 For `AddFileAttachment` test, create a temp file and verify the server receives multipart data.
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 
 ```bash
 git add internal/trello/attachments.go internal/trello/attachments_test.go internal/trello/client.go
@@ -5438,8 +5438,8 @@ Commands:
 Response shapes for void operations:
 - `attachments delete` returns `DeleteResult{Deleted: true, ID: attachmentID}`
 
-- [ ] **Step 1-4: Write tests, implement, verify**
-- [ ] **Step 5: Commit**
+- [x] **Step 1-4: Write tests, implement, verify**
+- [x] **Step 5: Commit**
 
 ```bash
 git add cmd/trello/attachments.go cmd/trello/attachments_test.go
@@ -5450,12 +5450,12 @@ git commit -m "feat: add attachments commands (list, add-file, add-url, delete)"
 
 ### Task 43: Run Full Test Suite and Commit Batch B
 
-- [ ] **Step 1: Run full test suite**
+- [x] **Step 1: Run full test suite**
 
 Run: `go test ./... -v`
 Expected: all tests PASS
 
-- [ ] **Step 2: Commit cleanup**
+- [x] **Step 2: Commit cleanup**
 
 ```bash
 git add -A
@@ -5519,8 +5519,8 @@ type ActionResult struct {
 ```
 Add `ActionResult` to `internal/trello/types.go` alongside `DeleteResult`. Use `ActionResult` for `labels add`, `labels remove`, `members add`, `members remove`. Use `DeleteResult` for all delete operations.
 
-- [ ] **Step 1-4: Write tests, implement, verify**
-- [ ] **Step 5: Commit**
+- [x] **Step 1-4: Write tests, implement, verify**
+- [x] **Step 5: Commit**
 
 ```bash
 git add internal/trello/labels.go internal/trello/labels_test.go cmd/trello/labels.go cmd/trello/labels_test.go internal/trello/client.go
@@ -5570,8 +5570,8 @@ Response shapes for void operations:
 
 All command handlers follow the single-auth-check pattern: call `auth.RequireAuth` once, pass `creds` to `getAPIClient(creds)`.
 
-- [ ] **Step 1-4: Write tests, implement, verify**
-- [ ] **Step 5: Commit**
+- [x] **Step 1-4: Write tests, implement, verify**
+- [x] **Step 5: Commit**
 
 ```bash
 git add internal/trello/members.go internal/trello/members_test.go cmd/trello/members.go cmd/trello/members_test.go internal/trello/client.go
@@ -5615,8 +5615,8 @@ Commands:
 - `search cards --query <text>` — returns `{query, cards}` wrapper
 - `search boards --query <text>` — returns `{query, boards}` wrapper
 
-- [ ] **Step 1-4: Write tests, implement, verify**
-- [ ] **Step 5: Commit**
+- [x] **Step 1-4: Write tests, implement, verify**
+- [x] **Step 5: Commit**
 
 ```bash
 git add internal/trello/search.go internal/trello/search_test.go cmd/trello/search.go cmd/trello/search_test.go internal/trello/client.go
@@ -5627,21 +5627,21 @@ git commit -m "feat: add search commands (cards, boards) with query wrapper resp
 
 ### Task 47: Remove All Remaining Stubs + Final Verification
 
-- [ ] **Step 1: Remove all remaining stub methods from client.go**
+- [x] **Step 1: Remove all remaining stub methods from client.go**
 
 Verify no stub methods remain — all should be replaced by implementations in resource-specific files.
 
-- [ ] **Step 2: Run full test suite**
+- [x] **Step 2: Run full test suite**
 
 Run: `go test ./... -v -count=1`
 Expected: all tests PASS
 
-- [ ] **Step 3: Verify compile-time interface check**
+- [x] **Step 3: Verify compile-time interface check**
 
 Run: `go build ./...`
 Expected: successful compilation (the `var _ API = (*Client)(nil)` check passes)
 
-- [ ] **Step 4: Test CLI end-to-end**
+- [x] **Step 4: Test CLI end-to-end**
 
 Run:
 ```bash
@@ -5652,7 +5652,7 @@ go run ./cmd/trello/ auth clear
 ```
 Expected: all return valid JSON envelopes
 
-- [ ] **Step 5: Final commit**
+- [x] **Step 5: Final commit**
 
 ```bash
 git add -A

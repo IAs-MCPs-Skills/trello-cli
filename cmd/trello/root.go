@@ -19,6 +19,9 @@ var rootCmd = &cobra.Command{
 	Use:   "trello",
 	Short: "Trello CLI — a machine-friendly Trello interface",
 	Long:  "A cross-platform CLI for Trello, designed for coding agents and terminal users. All commands return JSON.",
+	RunE: func(cmd *cobra.Command, args []string) error {
+		return cmd.Help()
+	},
 	PersistentPreRun: func(cmd *cobra.Command, args []string) {
 		level := slog.LevelWarn
 		if verboseFlag {

@@ -80,7 +80,7 @@ func TestClientGetWithQueryParams(t *testing.T) {
 	if !containsParam(capturedQuery, "filter=open") {
 		t.Errorf("query missing filter param: %s", capturedQuery)
 	}
-	if !containsParam(capturedQuery, "fields=id") {
+	if !containsParam(capturedQuery, "fields=id%2Cname") {
 		t.Errorf("query missing fields param: %s", capturedQuery)
 	}
 }
@@ -90,6 +90,7 @@ func TestClientPostSendsQueryParams(t *testing.T) {
 	var capturedMethod string
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		capturedMethod = r.Method
+
 		capturedQuery = r.URL.RawQuery
 		json.NewEncoder(w).Encode(map[string]string{"id": "new1"})
 	}))
