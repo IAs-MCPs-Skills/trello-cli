@@ -1,5 +1,7 @@
 # Trello CLI LLM Digest
 
+**Repository:** [github.com/Scale-Flow/trello-cli](https://github.com/Scale-Flow/trello-cli)
+
 ## Purpose
 
 This repository provides a cross-platform Trello CLI with deterministic JSON output. The CLI is intended for direct terminal use and for machine consumers such as scripts, agents, and future skills.
@@ -87,6 +89,17 @@ Interactive login notes:
 - Opens browser authorization flow
 - Uses localhost callback `http://localhost:3007/callback`
 - If browser launch fails, login URL is printed to `stderr`
+
+### API Key Prerequisite
+
+Users must create a Trello Power-Up before they can get an API key:
+
+1. Go to [trello.com/power-ups/admin](https://trello.com/power-ups/admin)
+2. Create a new Power-Up (it serves as the container for API credentials)
+3. Go to the API Key tab and generate a key
+4. Click the Token hyperlink to authorize and get a token
+
+If a user reports they cannot find their API key or the old `trello.com/app-key` URL doesn't work, direct them through the Power-Up creation flow above.
 
 ## Global Flags
 
