@@ -80,7 +80,7 @@ func TestClientGetWithQueryParams(t *testing.T) {
 	if !containsParam(capturedQuery, "filter=open") {
 		t.Errorf("query missing filter param: %s", capturedQuery)
 	}
-	if !containsParam(capturedQuery, "fields=id") {
+	if !containsParam(capturedQuery, "fields=id%2Cname") {
 		t.Errorf("query missing fields param: %s", capturedQuery)
 	}
 }

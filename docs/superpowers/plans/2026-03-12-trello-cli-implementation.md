@@ -5558,8 +5558,8 @@ Response shapes for void operations:
 
 All command handlers follow the single-auth-check pattern: call `auth.RequireAuth` once, pass `creds` to `getAPIClient(creds)`.
 
-- [ ] **Step 1-4: Write tests, implement, verify**
-- [ ] **Step 5: Commit**
+- [x] **Step 1-4: Write tests, implement, verify**
+- [x] **Step 5: Commit**
 
 ```bash
 git add internal/trello/members.go internal/trello/members_test.go cmd/trello/members.go cmd/trello/members_test.go internal/trello/client.go
@@ -5603,8 +5603,8 @@ Commands:
 - `search cards --query <text>` — returns `{query, cards}` wrapper
 - `search boards --query <text>` — returns `{query, boards}` wrapper
 
-- [ ] **Step 1-4: Write tests, implement, verify**
-- [ ] **Step 5: Commit**
+- [x] **Step 1-4: Write tests, implement, verify**
+- [x] **Step 5: Commit**
 
 ```bash
 git add internal/trello/search.go internal/trello/search_test.go cmd/trello/search.go cmd/trello/search_test.go internal/trello/client.go
@@ -5615,21 +5615,21 @@ git commit -m "feat: add search commands (cards, boards) with query wrapper resp
 
 ### Task 47: Remove All Remaining Stubs + Final Verification
 
-- [ ] **Step 1: Remove all remaining stub methods from client.go**
+- [x] **Step 1: Remove all remaining stub methods from client.go**
 
 Verify no stub methods remain — all should be replaced by implementations in resource-specific files.
 
-- [ ] **Step 2: Run full test suite**
+- [x] **Step 2: Run full test suite**
 
 Run: `go test ./... -v -count=1`
 Expected: all tests PASS
 
-- [ ] **Step 3: Verify compile-time interface check**
+- [x] **Step 3: Verify compile-time interface check**
 
 Run: `go build ./...`
 Expected: successful compilation (the `var _ API = (*Client)(nil)` check passes)
 
-- [ ] **Step 4: Test CLI end-to-end**
+- [x] **Step 4: Test CLI end-to-end**
 
 Run:
 ```bash

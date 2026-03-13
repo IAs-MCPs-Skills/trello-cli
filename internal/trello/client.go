@@ -139,7 +139,7 @@ func (c *Client) buildURL(path string, params map[string]string) string {
 	q.Set("key", c.apiKey)
 	q.Set("token", c.token)
 	for k, v := range params {
-		if strings.Contains(v, ",") {
+		if allowsRepeatedParam(k) && strings.Contains(v, ",") {
 			for _, part := range strings.Split(v, ",") {
 				q.Add(k, part)
 			}
@@ -153,6 +153,15 @@ func (c *Client) buildURL(path string, params map[string]string) string {
 	}
 	u.RawQuery = encoded
 	return u.String()
+}
+
+func allowsRepeatedParam(key string) bool {
+	switch key {
+	case "idLabels", "idMembers":
+		return true
+	default:
+		return false
+	}
 }
 
 func (c *Client) do(ctx context.Context, method, path string, params map[string]string, result any) error {
@@ -221,22 +230,3 @@ func (c *Client) do(ctx context.Context, method, path string, params map[string]
 
 // Compile-time check that Client implements API.
 var _ API = (*Client)(nil)
-
-// Stub methods — implemented in resource-specific files.
-func (c *Client) ListMembers(ctx context.Context, boardID string) ([]Member, error) { return nil, nil }
-
-func (c *Client) AddMemberToCard(ctx context.Context, cardID, memberID string) error { return nil }
-
-func (c *Client) RemoveMemberFromCard(ctx context.Context, cardID, memberID string) error {
-	return nil
-}
-
-func (c *Client) SearchCards(ctx context.Context, query string) (CardSearchResult, error) {
-	return CardSearchResult{}, nil
-}
-
-func (c *Client) SearchBoards(ctx context.Context, query string) (BoardSearchResult, error) {
-	return BoardSearchResult{}, nil
-}
-
-func (c *Client) GetMe(ctx context.Context) (Member, error) { return Member{}, nil }
