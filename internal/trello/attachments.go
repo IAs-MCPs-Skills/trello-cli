@@ -71,7 +71,10 @@ func (c *Client) postMultipartFile(ctx context.Context, path, filePath string, p
 		return contract.NewError(contract.UnknownError, fmt.Sprintf("failed to finalize multipart body: %v", err))
 	}
 
-	fullURL := c.buildURL(path, nil)
+	fullURL, err := c.buildURL(path, nil)
+	if err != nil {
+		return err
+	}
 	req, err := http.NewRequestWithContext(ctx, http.MethodPost, fullURL, body)
 	if err != nil {
 		return err

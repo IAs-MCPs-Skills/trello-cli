@@ -10,34 +10,6 @@ import (
 	"github.com/brettmcdowell/trello-cli/internal/trello"
 )
 
-func (m *mockAPI) ListComments(ctx context.Context, cardID string) ([]trello.Comment, error) {
-	if m.listCommentsFn != nil {
-		return m.listCommentsFn(ctx, cardID)
-	}
-	return nil, nil
-}
-
-func (m *mockAPI) AddComment(ctx context.Context, cardID, text string) (trello.Comment, error) {
-	if m.addCommentFn != nil {
-		return m.addCommentFn(ctx, cardID, text)
-	}
-	return trello.Comment{}, nil
-}
-
-func (m *mockAPI) UpdateComment(ctx context.Context, actionID, text string) (trello.Comment, error) {
-	if m.updateCommentFn != nil {
-		return m.updateCommentFn(ctx, actionID, text)
-	}
-	return trello.Comment{}, nil
-}
-
-func (m *mockAPI) DeleteComment(ctx context.Context, actionID string) error {
-	if m.deleteCommentFn != nil {
-		return m.deleteCommentFn(ctx, actionID)
-	}
-	return nil
-}
-
 func TestCommentsListCommand(t *testing.T) {
 	setupTestAuth(t)
 	credStore.Set("default", credentials.Credentials{APIKey: "k", Token: "t", AuthMode: "manual"})

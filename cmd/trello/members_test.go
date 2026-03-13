@@ -10,27 +10,6 @@ import (
 	"github.com/brettmcdowell/trello-cli/internal/trello"
 )
 
-func (m *mockAPI) ListMembers(ctx context.Context, boardID string) ([]trello.Member, error) {
-	if m.listMembersFn != nil {
-		return m.listMembersFn(ctx, boardID)
-	}
-	return nil, nil
-}
-
-func (m *mockAPI) AddMemberToCard(ctx context.Context, cardID, memberID string) error {
-	if m.addMemberToCardFn != nil {
-		return m.addMemberToCardFn(ctx, cardID, memberID)
-	}
-	return nil
-}
-
-func (m *mockAPI) RemoveMemberFromCard(ctx context.Context, cardID, memberID string) error {
-	if m.removeMemberFromCardFn != nil {
-		return m.removeMemberFromCardFn(ctx, cardID, memberID)
-	}
-	return nil
-}
-
 func TestMembersListCommand(t *testing.T) {
 	setupTestAuth(t)
 	credStore.Set("default", credentials.Credentials{APIKey: "k", Token: "t", AuthMode: "manual"})

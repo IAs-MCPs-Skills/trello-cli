@@ -10,34 +10,6 @@ import (
 	"github.com/brettmcdowell/trello-cli/internal/trello"
 )
 
-func (m *mockAPI) ListLabels(ctx context.Context, boardID string) ([]trello.Label, error) {
-	if m.listLabelsFn != nil {
-		return m.listLabelsFn(ctx, boardID)
-	}
-	return nil, nil
-}
-
-func (m *mockAPI) CreateLabel(ctx context.Context, boardID, name, color string) (trello.Label, error) {
-	if m.createLabelFn != nil {
-		return m.createLabelFn(ctx, boardID, name, color)
-	}
-	return trello.Label{}, nil
-}
-
-func (m *mockAPI) AddLabelToCard(ctx context.Context, cardID, labelID string) error {
-	if m.addLabelToCardFn != nil {
-		return m.addLabelToCardFn(ctx, cardID, labelID)
-	}
-	return nil
-}
-
-func (m *mockAPI) RemoveLabelFromCard(ctx context.Context, cardID, labelID string) error {
-	if m.removeLabelFromCardFn != nil {
-		return m.removeLabelFromCardFn(ctx, cardID, labelID)
-	}
-	return nil
-}
-
 func TestLabelsListCommand(t *testing.T) {
 	setupTestAuth(t)
 	credStore.Set("default", credentials.Credentials{APIKey: "k", Token: "t", AuthMode: "manual"})

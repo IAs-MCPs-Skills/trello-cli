@@ -10,48 +10,6 @@ import (
 	"github.com/brettmcdowell/trello-cli/internal/trello"
 )
 
-func (m *mockAPI) ListChecklists(ctx context.Context, cardID string) ([]trello.Checklist, error) {
-	if m.listChecklistsFn != nil {
-		return m.listChecklistsFn(ctx, cardID)
-	}
-	return nil, nil
-}
-
-func (m *mockAPI) CreateChecklist(ctx context.Context, cardID, name string) (trello.Checklist, error) {
-	if m.createChecklistFn != nil {
-		return m.createChecklistFn(ctx, cardID, name)
-	}
-	return trello.Checklist{}, nil
-}
-
-func (m *mockAPI) DeleteChecklist(ctx context.Context, checklistID string) error {
-	if m.deleteChecklistFn != nil {
-		return m.deleteChecklistFn(ctx, checklistID)
-	}
-	return nil
-}
-
-func (m *mockAPI) AddCheckItem(ctx context.Context, checklistID, name string) (trello.CheckItem, error) {
-	if m.addCheckItemFn != nil {
-		return m.addCheckItemFn(ctx, checklistID, name)
-	}
-	return trello.CheckItem{}, nil
-}
-
-func (m *mockAPI) UpdateCheckItem(ctx context.Context, cardID, itemID, state string) (trello.CheckItem, error) {
-	if m.updateCheckItemFn != nil {
-		return m.updateCheckItemFn(ctx, cardID, itemID, state)
-	}
-	return trello.CheckItem{}, nil
-}
-
-func (m *mockAPI) DeleteCheckItem(ctx context.Context, checklistID, itemID string) error {
-	if m.deleteCheckItemFn != nil {
-		return m.deleteCheckItemFn(ctx, checklistID, itemID)
-	}
-	return nil
-}
-
 func TestChecklistsListCommand(t *testing.T) {
 	setupTestAuth(t)
 	credStore.Set("default", credentials.Credentials{APIKey: "k", Token: "t", AuthMode: "manual"})

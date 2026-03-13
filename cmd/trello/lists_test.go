@@ -11,55 +11,6 @@ import (
 	"github.com/brettmcdowell/trello-cli/internal/trello"
 )
 
-func (m *mockAPI) ListLists(ctx context.Context, boardID string) ([]trello.List, error) {
-	if m.listListsFn != nil {
-		return m.listListsFn(ctx, boardID)
-	}
-	return nil, nil
-}
-
-func (m *mockAPI) CreateList(ctx context.Context, boardID, name string) (trello.List, error) {
-	if m.createListFn != nil {
-		return m.createListFn(ctx, boardID, name)
-	}
-	return trello.List{}, nil
-}
-
-func (m *mockAPI) UpdateList(ctx context.Context, listID string, params trello.UpdateListParams) (trello.List, error) {
-	if m.updateListFn != nil {
-		return m.updateListFn(ctx, listID, params)
-	}
-	return trello.List{}, nil
-}
-
-func (m *mockAPI) ArchiveList(ctx context.Context, listID string) (trello.List, error) {
-	if m.archiveListFn != nil {
-		return m.archiveListFn(ctx, listID)
-	}
-	return trello.List{}, nil
-}
-
-func (m *mockAPI) MoveList(ctx context.Context, listID, boardID string, pos *float64) (trello.List, error) {
-	if m.moveListFn != nil {
-		return m.moveListFn(ctx, listID, boardID, pos)
-	}
-	return trello.List{}, nil
-}
-
-func assertContractCode(t *testing.T, err error, want string) {
-	t.Helper()
-	if err == nil {
-		t.Fatalf("expected error with code %s, got nil", want)
-	}
-	ce, ok := err.(*contract.ContractError)
-	if !ok {
-		t.Fatalf("expected *ContractError, got %T: %v", err, err)
-	}
-	if ce.Code != want {
-		t.Fatalf("error code = %s, want %s", ce.Code, want)
-	}
-}
-
 func TestListsListCommand(t *testing.T) {
 	setupTestAuth(t)
 	credStore.Set("default", credentials.Credentials{APIKey: "k", Token: "t", AuthMode: "manual"})

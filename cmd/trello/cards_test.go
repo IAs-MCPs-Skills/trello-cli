@@ -10,62 +10,6 @@ import (
 	"github.com/brettmcdowell/trello-cli/internal/trello"
 )
 
-func (m *mockAPI) ListCardsByBoard(ctx context.Context, boardID string) ([]trello.Card, error) {
-	if m.listCardsByBoardFn != nil {
-		return m.listCardsByBoardFn(ctx, boardID)
-	}
-	return nil, nil
-}
-
-func (m *mockAPI) ListCardsByList(ctx context.Context, listID string) ([]trello.Card, error) {
-	if m.listCardsByListFn != nil {
-		return m.listCardsByListFn(ctx, listID)
-	}
-	return nil, nil
-}
-
-func (m *mockAPI) GetCard(ctx context.Context, cardID string) (trello.Card, error) {
-	if m.getCardFn != nil {
-		return m.getCardFn(ctx, cardID)
-	}
-	return trello.Card{}, nil
-}
-
-func (m *mockAPI) CreateCard(ctx context.Context, params trello.CreateCardParams) (trello.Card, error) {
-	if m.createCardFn != nil {
-		return m.createCardFn(ctx, params)
-	}
-	return trello.Card{}, nil
-}
-
-func (m *mockAPI) UpdateCard(ctx context.Context, cardID string, params trello.UpdateCardParams) (trello.Card, error) {
-	if m.updateCardFn != nil {
-		return m.updateCardFn(ctx, cardID, params)
-	}
-	return trello.Card{}, nil
-}
-
-func (m *mockAPI) MoveCard(ctx context.Context, cardID, listID string, pos *float64) (trello.Card, error) {
-	if m.moveCardFn != nil {
-		return m.moveCardFn(ctx, cardID, listID, pos)
-	}
-	return trello.Card{}, nil
-}
-
-func (m *mockAPI) ArchiveCard(ctx context.Context, cardID string) (trello.Card, error) {
-	if m.archiveCardFn != nil {
-		return m.archiveCardFn(ctx, cardID)
-	}
-	return trello.Card{}, nil
-}
-
-func (m *mockAPI) DeleteCard(ctx context.Context, cardID string) error {
-	if m.deleteCardFn != nil {
-		return m.deleteCardFn(ctx, cardID)
-	}
-	return nil
-}
-
 func TestCardsListByBoardCommand(t *testing.T) {
 	setupTestAuth(t)
 	credStore.Set("default", credentials.Credentials{APIKey: "k", Token: "t", AuthMode: "manual"})
@@ -172,8 +116,12 @@ func TestCardsCreateCommand(t *testing.T) {
 			if params.Due == nil || *params.Due != due {
 				t.Fatalf("due = %v", params.Due)
 			}
-			_ = labels
-			_ = members
+			if params.Labels == nil || *params.Labels != labels {
+				t.Fatalf("labels = %v, want %q", params.Labels, labels)
+			}
+			if params.Members == nil || *params.Members != members {
+				t.Fatalf("members = %v, want %q", params.Members, members)
+			}
 			return trello.Card{ID: "c1", Name: params.Name, IDList: params.IDList, Desc: desc, Due: &due}, nil
 		},
 	}
@@ -337,11 +285,4 @@ func TestCardsDeleteMissingCard(t *testing.T) {
 	setupTestAuth(t)
 	credStore.Set("default", credentials.Credentials{APIKey: "k", Token: "t", AuthMode: "manual"})
 	assertContractCode(t, executeRootArgs("cards", "delete"), "VALIDATION_ERROR")
-}
-
-func executeRootArgs(args ...string) error {
-	var buf bytes.Buffer
-	rootCmd.SetOut(&buf)
-	rootCmd.SetArgs(args)
-	return rootCmd.Execute()
 }

@@ -124,10 +124,12 @@ type UpdateListParams struct {
 
 // CreateCardParams holds fields for card creation.
 type CreateCardParams struct {
-	IDList string  `json:"idList"`
-	Name   string  `json:"name"`
-	Desc   *string `json:"desc,omitempty"`
-	Due    *string `json:"due,omitempty"`
+	IDList  string  `json:"idList"`
+	Name    string  `json:"name"`
+	Desc    *string `json:"desc,omitempty"`
+	Due     *string `json:"due,omitempty"`
+	Labels  *string `json:"idLabels,omitempty"`
+	Members *string `json:"idMembers,omitempty"`
 }
 
 // UpdateCardParams holds optional fields for card updates.

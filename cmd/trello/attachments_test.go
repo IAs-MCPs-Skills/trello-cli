@@ -11,34 +11,6 @@ import (
 	"github.com/brettmcdowell/trello-cli/internal/trello"
 )
 
-func (m *mockAPI) ListAttachments(ctx context.Context, cardID string) ([]trello.Attachment, error) {
-	if m.listAttachmentsFn != nil {
-		return m.listAttachmentsFn(ctx, cardID)
-	}
-	return nil, nil
-}
-
-func (m *mockAPI) AddFileAttachment(ctx context.Context, cardID, filePath string, name *string) (trello.Attachment, error) {
-	if m.addFileAttachmentFn != nil {
-		return m.addFileAttachmentFn(ctx, cardID, filePath, name)
-	}
-	return trello.Attachment{}, nil
-}
-
-func (m *mockAPI) AddURLAttachment(ctx context.Context, cardID, urlStr string, name *string) (trello.Attachment, error) {
-	if m.addURLAttachmentFn != nil {
-		return m.addURLAttachmentFn(ctx, cardID, urlStr, name)
-	}
-	return trello.Attachment{}, nil
-}
-
-func (m *mockAPI) DeleteAttachment(ctx context.Context, cardID, attachmentID string) error {
-	if m.deleteAttachmentFn != nil {
-		return m.deleteAttachmentFn(ctx, cardID, attachmentID)
-	}
-	return nil
-}
-
 func TestAttachmentsListCommand(t *testing.T) {
 	setupTestAuth(t)
 	credStore.Set("default", credentials.Credentials{APIKey: "k", Token: "t", AuthMode: "manual"})

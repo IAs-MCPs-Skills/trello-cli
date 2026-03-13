@@ -35,6 +35,12 @@ func (c *Client) CreateCard(ctx context.Context, params CreateCardParams) (Card,
 	if params.Due != nil {
 		queryParams["due"] = *params.Due
 	}
+	if params.Labels != nil {
+		queryParams["idLabels"] = *params.Labels
+	}
+	if params.Members != nil {
+		queryParams["idMembers"] = *params.Members
+	}
 
 	var card Card
 	err := c.Post(ctx, "/1/cards", queryParams, &card)

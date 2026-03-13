@@ -10,20 +10,6 @@ import (
 	"github.com/brettmcdowell/trello-cli/internal/trello"
 )
 
-func (m *mockAPI) SearchCards(ctx context.Context, query string) (trello.CardSearchResult, error) {
-	if m.searchCardsFn != nil {
-		return m.searchCardsFn(ctx, query)
-	}
-	return trello.CardSearchResult{}, nil
-}
-
-func (m *mockAPI) SearchBoards(ctx context.Context, query string) (trello.BoardSearchResult, error) {
-	if m.searchBoardsFn != nil {
-		return m.searchBoardsFn(ctx, query)
-	}
-	return trello.BoardSearchResult{}, nil
-}
-
 func TestSearchCardsCommand(t *testing.T) {
 	setupTestAuth(t)
 	credStore.Set("default", credentials.Credentials{APIKey: "k", Token: "t", AuthMode: "manual"})

@@ -1,6 +1,7 @@
 package main
 
 import (
+	"errors"
 	"fmt"
 	"io"
 	"log/slog"
@@ -50,8 +51,8 @@ func output(w io.Writer, data any) error {
 
 // handleError writes an error envelope to stdout and returns the appropriate exit code.
 func handleError(w io.Writer, err error) int {
-	ce, ok := err.(*contract.ContractError)
-	if !ok {
+	var ce *contract.ContractError
+	if !errors.As(err, &ce) {
 		ce = &contract.ContractError{Code: contract.UnknownError, Message: err.Error()}
 	}
 	envelope, marshalErr := contract.ErrorFromContractError(ce)

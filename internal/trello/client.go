@@ -159,8 +159,11 @@ func (c *Client) PostMultipart(ctx context.Context, path string, params map[stri
 
 // buildURL constructs the full URL with auth query params (key, token) and any
 // additional request params. Shared by both do() and postMultipartFile().
-func (c *Client) buildURL(path string, params map[string]string) string {
-	u, _ := url.Parse(c.baseURL + path)
+func (c *Client) buildURL(path string, params map[string]string) (string, error) {
+	u, err := url.Parse(c.baseURL + path)
+	if err != nil {
+		return "", fmt.Errorf("invalid URL %q: %w", c.baseURL+path, err)
+	}
 	q := u.Query()
 	q.Set("key", c.apiKey)
 	q.Set("token", c.token)
@@ -178,7 +181,7 @@ func (c *Client) buildURL(path string, params map[string]string) string {
 		encoded = "&" + encoded
 	}
 	u.RawQuery = encoded
-	return u.String()
+	return u.String(), nil
 }
 
 func allowsRepeatedParam(key string) bool {
@@ -207,7 +210,10 @@ func (c *Client) doJSON(ctx context.Context, method, path string, body any, resu
 }
 
 func (c *Client) doWithBody(ctx context.Context, method, path string, params map[string]string, body []byte, contentType string, result any) error {
-	fullURL := c.buildURL(path, params)
+	fullURL, err := c.buildURL(path, params)
+	if err != nil {
+		return err
+	}
 
 	maxAttempts := 1 + c.opts.MaxRetries
 	if maxAttempts < 1 {

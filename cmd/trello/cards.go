@@ -75,6 +75,8 @@ var cardsCreateCmd = &cobra.Command{
 		name, _ := cmd.Flags().GetString("name")
 		desc, _ := cmd.Flags().GetString("desc")
 		due, _ := cmd.Flags().GetString("due")
+		labels, _ := cmd.Flags().GetString("labels")
+		members, _ := cmd.Flags().GetString("members")
 
 		if err := contract.RequireFlag("list", listID); err != nil {
 			return err
@@ -92,6 +94,12 @@ var cardsCreateCmd = &cobra.Command{
 		}
 		if due != "" {
 			params.Due = &due
+		}
+		if labels != "" {
+			params.Labels = &labels
+		}
+		if members != "" {
+			params.Members = &members
 		}
 
 		creds, err := auth.RequireAuth(getCredStore(), "default")
