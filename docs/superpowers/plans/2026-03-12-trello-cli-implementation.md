@@ -5426,8 +5426,8 @@ Commands:
 Response shapes for void operations:
 - `attachments delete` returns `DeleteResult{Deleted: true, ID: attachmentID}`
 
-- [ ] **Step 1-4: Write tests, implement, verify**
-- [ ] **Step 5: Commit**
+- [x] **Step 1-4: Write tests, implement, verify**
+- [x] **Step 5: Commit**
 
 ```bash
 git add cmd/trello/attachments.go cmd/trello/attachments_test.go
@@ -5438,12 +5438,12 @@ git commit -m "feat: add attachments commands (list, add-file, add-url, delete)"
 
 ### Task 43: Run Full Test Suite and Commit Batch B
 
-- [ ] **Step 1: Run full test suite**
+- [x] **Step 1: Run full test suite**
 
 Run: `go test ./... -v`
 Expected: all tests PASS
 
-- [ ] **Step 2: Commit cleanup**
+- [x] **Step 2: Commit cleanup**
 
 ```bash
 git add -A
