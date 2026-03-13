@@ -5640,7 +5640,7 @@ go run ./cmd/trello/ auth clear
 ```
 Expected: all return valid JSON envelopes
 
-- [ ] **Step 5: Final commit**
+- [x] **Step 5: Final commit**
 
 ```bash
 git add -A
