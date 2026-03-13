@@ -4,22 +4,50 @@
 
 `trello` is a JSON-first command-line interface for Trello. It is designed so commands can be piped into scripts, LLM workflows, and other tooling without scraping human-oriented text.
 
-## Build And Verify
+## Prerequisites: Get Your Trello API Key
+
+The CLI needs a Trello API key and token to access your Trello data. Trello requires you to create a Power-Up to get these credentials:
+
+1. **Create a Trello account** at [trello.com](https://trello.com) if you don't have one
+2. **Create a Power-Up** at [trello.com/power-ups/admin](https://trello.com/power-ups/admin) — click "Create new" and fill in the basic details. The Power-Up doesn't need to do anything; it's just the container for your API credentials.
+3. **Generate an API key** — in your Power-Up's settings, go to the **API Key** tab and click **Generate a new API Key**
+4. **Get a token** — on the same page, click the **Token** hyperlink next to your API key. A permissions screen appears — click **Allow**, then copy the token displayed on the next page.
+
+Keep both your API key and token handy for the authentication step below.
+
+## Install
+
+### Homebrew (macOS / Linux)
 
 ```bash
+brew tap Scale-Flow/tap
+brew install trello-cli
+```
+
+### Go Install
+
+```bash
+go install github.com/Scale-Flow/trello-cli/cmd/trello@latest
+```
+
+### Build From Source
+
+```bash
+git clone https://github.com/Scale-Flow/trello-cli.git
+cd trello-cli
 go build -o bin/trello ./cmd/trello
 ./bin/trello version --pretty
 ```
 
-You can also replace `./bin/trello` with `go run ./cmd/trello` while developing.
+You can also use `go run ./cmd/trello` in place of `./bin/trello` during development.
 
 ## Authenticate
 
 ### Option 1: Manual Credentials
 
 ```bash
-./bin/trello auth set --api-key "$TRELLO_API_KEY" --token "$TRELLO_TOKEN"
-./bin/trello auth status --pretty
+trello auth set --api-key <your-api-key> --token <your-token>
+trello auth status --pretty
 ```
 
 ### Option 2: Interactive Browser Login
@@ -27,9 +55,9 @@ You can also replace `./bin/trello` with `go run ./cmd/trello` while developing.
 Interactive login requires a Trello API key. The CLI can read that key from `TRELLO_API_KEY` or from a previously stored key.
 
 ```bash
-export TRELLO_API_KEY="your-api-key"
-./bin/trello auth login
-./bin/trello auth status --pretty
+trello auth set-key --api-key <your-api-key>
+trello auth login
+trello auth status --pretty
 ```
 
 The login flow opens a browser and waits for the callback on `http://localhost:3007/callback`.
@@ -48,25 +76,25 @@ Add `--pretty` to any command for indented JSON.
 List boards:
 
 ```bash
-./bin/trello boards list --pretty
+trello boards list --pretty
 ```
 
 List lists on a board:
 
 ```bash
-./bin/trello lists list --board <board-id> --pretty
+trello lists list --board <board-id> --pretty
 ```
 
 Create a card:
 
 ```bash
-./bin/trello cards create --list <list-id> --name "Draft docs" --desc "Initial pass"
+trello cards create --list <list-id> --name "Draft docs" --desc "Initial pass"
 ```
 
 Search cards:
 
 ```bash
-./bin/trello search cards --query "docs"
+trello search cards --query "docs"
 ```
 
 ## Recommended Usage Patterns
