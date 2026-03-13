@@ -218,9 +218,23 @@ type CreateCustomFieldParams struct {
 }
 
 // UpdateCustomFieldParams contains fields that can be updated on a custom field.
+// Trello's API expects display settings as flat keys ("display/cardFront")
+// rather than nested JSON, so this type implements a custom MarshalJSON.
 type UpdateCustomFieldParams struct {
-	Name    *string             `json:"name,omitempty"`
-	Display *CustomFieldDisplay `json:"display,omitempty"`
+	Name    *string
+	Display *CustomFieldDisplay
+}
+
+// MarshalJSON produces the flat-key format Trello expects for display settings.
+func (p UpdateCustomFieldParams) MarshalJSON() ([]byte, error) {
+	m := make(map[string]any)
+	if p.Name != nil {
+		m["name"] = *p.Name
+	}
+	if p.Display != nil {
+		m["display/cardFront"] = p.Display.CardFront
+	}
+	return json.Marshal(m)
 }
 
 // CreateCustomFieldOptionParams contains fields for creating a new option.

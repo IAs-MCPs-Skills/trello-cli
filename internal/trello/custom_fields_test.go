@@ -205,9 +205,9 @@ func TestUpdateCustomField(t *testing.T) {
 		if payload["name"] != "Status Updated" {
 			t.Fatalf("name = %v", payload["name"])
 		}
-		display, _ := payload["display"].(map[string]any)
-		if display == nil || display["cardFront"] != false {
-			t.Fatalf("display.cardFront = %v", display["cardFront"])
+		// Trello expects flat key "display/cardFront", not nested object
+		if payload["display/cardFront"] != false {
+			t.Fatalf("display/cardFront = %v", payload["display/cardFront"])
 		}
 		if err := json.NewEncoder(w).Encode(map[string]any{
 			"id":      "cf1",
