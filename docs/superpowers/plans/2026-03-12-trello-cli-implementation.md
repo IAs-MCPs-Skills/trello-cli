@@ -3908,7 +3908,7 @@ git commit -m "feat: add Trello API client with auth injection and HTTP error ma
 **Files:**
 - Create: `internal/trello/errors_test.go`
 
-- [ ] **Step 1: Write the tests**
+- [x] **Step 1: Write the tests**
 
 Create `internal/trello/errors_test.go`:
 ```go
@@ -4006,12 +4006,12 @@ func TestHTTPError500(t *testing.T) {
 }
 ```
 
-- [ ] **Step 2: Run tests to verify they pass**
+- [x] **Step 2: Run tests to verify they pass**
 
 Run: `go test ./internal/trello/ -run "TestHTTPError" -v`
 Expected: all 4 tests PASS
 
-- [ ] **Step 3: Commit**
+- [x] **Step 3: Commit**
 
 ```bash
 git add internal/trello/errors_test.go
