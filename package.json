@@ -1,0 +1,28 @@
+{
+  "name": "trello-cli",
+  "version": "1.0.0",
+  "description": "[![CI](https://github.com/Scale-Flow/trello-cli/actions/workflows/ci.yml/badge.svg)](https://github.com/Scale-Flow/trello-cli/actions/workflows/ci.yml)\r [![Go Version](https://img.shields.io/badge/Go-1.26-00ADD8?logo=go&logoColor=white)](https://go.dev/)\r [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)\r [![Release](https://img.shields.io/github/v/release/Scale-Flow/trello-cli?include_prereleases)](https://github.com/Scale-Flow/trello-cli/releases)",
+  "main": "index.js",
+  "directories": {
+    "doc": "docs"
+  },
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/IAs-MCPs-Skills/trello-cli.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "bugs": {
+    "url": "https://github.com/IAs-MCPs-Skills/trello-cli/issues"
+  },
+  "homepage": "https://github.com/IAs-MCPs-Skills/trello-cli#readme",
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "^1.29.0",
+    "node-fetch": "^2.7.0"
+  }
+}
